@@ -68,6 +68,52 @@ class GreyCard(BrownCard):
 	def get_colour(self):
 		return "GREY"
 	
+class BlueCard(Card):
+	def parse_infotext(self, text):
+		self.points = int(text)
+		return True
+
+	def get_colour(self):
+		return "BLUE"
+		
+	def get_info(self):
+		return "%d points" %(self.points)
+
+	def score(self):
+		return self.points
+
+class GreenCard(Card):
+	def parse_infotext(self, text):
+		if text[0] in [SCIENCE_COMPASS, SCIENCE_GEAR, SCIENCE_TABLET]:
+			self.group = text[0]
+			return True
+		return False
+	
+	def get_info(self):
+		return self.group
+
+	def get_colour(self):
+		return "GREEN"
+
+class FooPlaceHolderCard(Card):
+	def parse_infotext(self, text):
+		self.text = text
+		return True
+	
+	def get_info(self):
+		return self.text
+
+	def get_colour(self):
+		return "-----"
+		
+class YellowCard(FooPlaceHolderCard):
+	def get_colour(self):
+		return "YELLOW"
+
+class PurpleCard(FooPlaceHolderCard):
+	def get_colour(self):
+		return "PURPLE"
+
 
 def build_card(colour, name, infostr):
 	card = None
@@ -75,6 +121,14 @@ def build_card(colour, name, infostr):
 		card = BrownCard(name)
 	elif colour == "grey":
 		card = GreyCard(name)
+	elif colour == "blue":
+		card = BlueCard(name)
+	elif colour == "green":
+		card = GreenCard(name)
+	elif colour == "yellow":
+		card = YellowCard(name)
+	elif colour == "purple":
+		card = PurpleCard(name)
 	
 	if card != None and card.parse_infotext(infostr):
 		return card
@@ -105,9 +159,6 @@ def read_cards_file(filename):
 				cards.append(c)
 	return cards
 			
-
-
-
 
 cards = read_cards_file("7wonders.txt")
 for c in cards:
