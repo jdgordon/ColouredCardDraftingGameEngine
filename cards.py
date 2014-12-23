@@ -153,6 +153,7 @@ def build_card(colour, name, age, players, infostr):
 	if card != None and card.parse_infotext(infostr):
 		return card
 	
+	print "Error loading card:", name
 	return None
 
 
@@ -233,18 +234,20 @@ def score_blue(player):
 
 cards = read_cards_file("7wonders.txt")
 
-age_1 = [c for c in cards if c.age == 1]
-age_2 = [c for c in cards if c.age == 2]
-age_3 = [c for c in cards if c.age == 3 and c.get_colour() != "PURPLE"]
-purple = [c for c in cards if c.age == 3 and c.get_colour() == "PURPLE"]
+PLAYERS = 3
+age_1 = [c for c in cards if c.age == 1 and c.players <= PLAYERS]
+age_2 = [c for c in cards if c.age == 2 and c.players <= PLAYERS]
+age_3 = [c for c in cards if c.age == 3 and c.get_colour() != "PURPLE" and c.players <= PLAYERS]
+purple = [c for c in cards if c.age == 3 and c.get_colour() == "PURPLE" and c.players <= PLAYERS]
 
 
 random.shuffle(age_1)
 random.shuffle(age_2)
-age_3 += purple[0:5]
+random.shuffle(purple)
+age_3 += purple[0 : PLAYERS + 2]
 random.shuffle(age_3)
 
-PLAYERS = 3
+
 p1 = age_1[0:7] + age_2[0:7] + age_3[0:7]
 p2 = age_1[7:14] + age_2[7:14] + age_3[7:14]
 p3 = age_1[14:21] + age_2[14:21] + age_3[14:21]
