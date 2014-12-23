@@ -26,10 +26,6 @@ class Card:
 		''' Called when the card is played onto the table'''
 		pass
 	
-	def score(self, table, left, right):
-		''' Called when the card needs to score itself end game'''
-		return 0
-	
 	def get_colour(self):
 		return ""
 		
@@ -84,7 +80,7 @@ class BlueCard(Card):
 	def get_info(self):
 		return "%d points" %(self.points)
 
-	def score(self, table, left, right):
+	def score(self):
 		return self.points
 
 class GreenCard(Card):
@@ -110,6 +106,9 @@ class RedCard(Card):
 
 	def get_colour(self):
 		return "RED"
+	
+	def get_strength(self):
+		return self.strength
 
 class FooPlaceHolderCard(Card):
 	def parse_infotext(self, text):
@@ -210,7 +209,27 @@ def score_science(player_cards):
 
 	return find_best_score(count[SCIENCE_COMPASS], count[SCIENCE_GEAR], count[SCIENCE_TABLET], choice_cards)
 	
+def score_military(player, opponent, age):
+	my_strength = 0
+	their_strength = 0
 	
+	for c in [c for c in player if c.get_colour() == "RED"]:
+		my_strength += c.get_strength()
+	for c in [c for c in opponent if c.get_colour() == "RED"]:
+		their_strength += c.get_strength()
+	
+	if my_strength > their_strength:
+		return [1,3,5][age - 1]
+	elif my_strength < their_strength:
+		return -1
+	else:
+		return 0
+
+def score_blue(player):
+	score = 0
+	for c in [c for c in player if c.get_colour() == "BLUE"]:
+		score += c.score()
+	return score
 
 cards = read_cards_file("7wonders.txt")
 
@@ -227,10 +246,12 @@ random.shuffle(age_3)
 
 PLAYERS = 3
 p1 = age_1[0:7] + age_2[0:7] + age_3[0:7]
-#p2 = round[7:14]
-#p3 = round[14:21]
+p2 = age_1[7:14] + age_2[7:14] + age_3[7:14]
+p3 = age_1[14:21] + age_2[14:21] + age_3[14:21]
 
-score_science(p1)
+print score_science(p1)
+print score_military(p1, p2, 3)
+print score_blue(p1)
 
 
 
