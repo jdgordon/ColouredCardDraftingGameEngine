@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import random
 
 RESOURCE_WOOD = "W"
 RESOURCE_ORE = "O"
@@ -13,9 +14,10 @@ SCIENCE_COMPASS = "C"
 SCIENCE_TABLET = "T"
 
 class Card:
-	def __init__(self, name):
+	def __init__(self, name, age, players):
 		self.name = name
-		self.age = "1"
+		self.age = age
+		self.players = players
 	
 	def parse_infotext(self, text):
 		return True
@@ -24,9 +26,9 @@ class Card:
 		''' Called when the card is played onto the table'''
 		pass
 	
-	def score(self):
+	def score(self, table, left, right):
 		''' Called when the card needs to score itself end game'''
-		pass
+		return 0
 	
 	def get_colour(self):
 		return ""
@@ -35,7 +37,10 @@ class Card:
 		return ""
 
 	def get_name(self):
-		return self.name + " (" + self.get_colour() + ")" + " -> " + self.get_info()
+		return "[%s] %d+ %s (%s) -> %s" % (self.age, self.players, self.name, self.get_colour(), self.get_info())
+		
+	def __repr__(self):
+		return self.get_name()
 
 class BrownCard(Card):
 	valid_resources = [RESOURCE_WOOD, RESOURCE_ORE, RESOURCE_STONE, RESOURCE_BRICK]
@@ -79,7 +84,7 @@ class BlueCard(Card):
 	def get_info(self):
 		return "%d points" %(self.points)
 
-	def score(self):
+	def score(self, table, left, right):
 		return self.points
 
 class GreenCard(Card):
@@ -94,6 +99,17 @@ class GreenCard(Card):
 
 	def get_colour(self):
 		return "GREEN"
+
+class RedCard(Card):
+	def parse_infotext(self, text):
+		self.strength = int(text)
+		return True
+	
+	def get_info(self):
+		return "%d" % (self.strength)
+
+	def get_colour(self):
+		return "RED"
 
 class FooPlaceHolderCard(Card):
 	def parse_infotext(self, text):
@@ -113,23 +129,28 @@ class YellowCard(FooPlaceHolderCard):
 class PurpleCard(FooPlaceHolderCard):
 	def get_colour(self):
 		return "PURPLE"
+	
+	def gives_science(self):
+		return False
 
 
-def build_card(colour, name, infostr):
+def build_card(colour, name, age, players, infostr):
 	card = None
 	if colour == "brown":
-		card = BrownCard(name)
+		card = BrownCard(name, age, players)
 	elif colour == "grey":
-		card = GreyCard(name)
+		card = GreyCard(name, age, players)
 	elif colour == "blue":
-		card = BlueCard(name)
+		card = BlueCard(name, age, players)
 	elif colour == "green":
-		card = GreenCard(name)
+		card = GreenCard(name, age, players)
+	elif colour == "red":
+		card = RedCard(name, age, players)
 	elif colour == "yellow":
-		card = YellowCard(name)
+		card = YellowCard(name, age, players)
 	elif colour == "purple":
-		card = PurpleCard(name)
-	
+		card = PurpleCard(name, age, players)
+
 	if card != None and card.parse_infotext(infostr):
 		return card
 	
@@ -154,12 +175,62 @@ def read_cards_file(filename):
 			prebuilt = values[5].strip()
 			postbuilt = values[6].strip()
 			text = values[7].strip()
-			c = build_card(colour, name, text)
+			c = build_card(colour, name, age, players, text)
 			if c:
 				cards.append(c)
 	return cards
-			
+
+def calc_science_score(compass, gear, tablets):
+	counts = sorted([compass, gear, tablets], reverse=True)
+	total = 0
+	for i in range(0, 2):
+		total += counts[i] * counts[i]
+	return 7 * counts[2] + total
+
+def find_best_score(compass, gear, tablets, choice):
+	if choice == 0:
+		#print "%d %d %d -> %d" % (compass, gear, tablets, calc_science_score(compass, gear, tablets))
+		return calc_science_score(compass, gear, tablets)
+	scr_compass = find_best_score(compass + 1, gear, tablets, choice - 1)
+	scr_gear = find_best_score(compass, gear + 1, tablets, choice - 1)
+	scr_tablet = find_best_score(compass, gear, tablets + 1, choice - 1)
+	return sorted([scr_compass, scr_gear, scr_tablet], reverse=True)[0]
+
+def score_science(player_cards):
+	count = {}
+	count[SCIENCE_COMPASS] = 0
+	count[SCIENCE_GEAR] = 0
+	count[SCIENCE_TABLET] = 0
+	choice_cards = 0
+	for c in player_cards:
+		if c.get_colour() == "GREEN":
+			count[c.get_info()] += 1
+		elif c.get_colour() == "PURPLE" and c.gives_science():
+			choice_cards += 1
+
+	return find_best_score(count[SCIENCE_COMPASS], count[SCIENCE_GEAR], count[SCIENCE_TABLET], choice_cards)
+	
+	
 
 cards = read_cards_file("7wonders.txt")
-for c in cards:
-	print c.get_name()
+
+age_1 = [c for c in cards if c.age == 1]
+age_2 = [c for c in cards if c.age == 2]
+age_3 = [c for c in cards if c.age == 3 and c.get_colour() != "PURPLE"]
+purple = [c for c in cards if c.age == 3 and c.get_colour() == "PURPLE"]
+
+
+random.shuffle(age_1)
+random.shuffle(age_2)
+age_3 += purple[0:5]
+random.shuffle(age_3)
+
+PLAYERS = 3
+p1 = age_1[0:7] + age_2[0:7] + age_3[0:7]
+#p2 = round[7:14]
+#p3 = round[14:21]
+
+score_science(p1)
+
+
+
