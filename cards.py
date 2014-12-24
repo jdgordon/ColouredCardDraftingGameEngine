@@ -178,6 +178,7 @@ def read_cards_file(filename):
 			c = build_card(colour, name, age, players, text)
 			if c:
 				cards.append(c)
+	print "Loaded %d cards" % ( len(cards))
 	return cards
 
 def calc_science_score(compass, gear, tablets):
