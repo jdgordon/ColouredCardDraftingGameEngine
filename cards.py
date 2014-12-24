@@ -13,11 +13,29 @@ SCIENCE_GEAR = "G"
 SCIENCE_COMPASS = "C"
 SCIENCE_TABLET = "T"
 
+class Player:
+	def __init__(self, name):
+		self.name = name
+		self.money = 0
+		self.tableau = [] # all the players played cards
+		self.military = [] # war wins/losses
+		self.east_trade_prices = {
+			RESOURCE_WOOD: 2,
+			RESOURCE_ORE: 2,
+			RESOURCE_STONE: 2,
+			RESOURCE_BRICK: 2,
+			RESOURCE_GLASS: 2,
+			RESOURCE_LOOM: 2,
+			RESOURCE_PAPER: 2
+		}
+		self.west_trade_prices = self.east_trade_prices
+
 class Card:
-	def __init__(self, name, age, players):
+	def __init__(self, name, age, cost, players):
 		self.name = name
 		self.age = age
 		self.players = players
+		self.cost = cost
 	
 	def parse_infotext(self, text):
 		return True
@@ -133,22 +151,21 @@ class PurpleCard(FooPlaceHolderCard):
 		return False
 
 
-def build_card(colour, name, age, players, infostr):
-	card = None
-	if colour == "brown":
-		card = BrownCard(name, age, players)
-	elif colour == "grey":
-		card = GreyCard(name, age, players)
-	elif colour == "blue":
-		card = BlueCard(name, age, players)
-	elif colour == "green":
-		card = GreenCard(name, age, players)
-	elif colour == "red":
-		card = RedCard(name, age, players)
-	elif colour == "yellow":
-		card = YellowCard(name, age, players)
-	elif colour == "purple":
-		card = PurpleCard(name, age, players)
+def build_card(colour, name, age, cost, players, infostr):
+	cardclasses = {
+		"brown": BrownCard,
+		"grey": GreyCard,
+		"blue": BlueCard,
+		"green": GreenCard,
+		"red": RedCard,
+		"yellow": YellowCard,
+		"purple": PurpleCard
+	}
+		
+	if not colour in cardclasses:
+		return None
+	
+	card = cardclasses[colour](name, age, cost, players)
 
 	if card != None and card.parse_infotext(infostr):
 		return card
@@ -175,7 +192,7 @@ def read_cards_file(filename):
 			prebuilt = values[5].strip()
 			postbuilt = values[6].strip()
 			text = values[7].strip()
-			c = build_card(colour, name, age, players, text)
+			c = build_card(colour, name, age, cost, players, text)
 			if c:
 				cards.append(c)
 	print "Loaded %d cards" % ( len(cards))
@@ -190,19 +207,20 @@ def calc_science_score(compass, gear, tablets):
 
 def find_best_score(compass, gear, tablets, choice):
 	if choice == 0:
-		#print "%d %d %d -> %d" % (compass, gear, tablets, calc_science_score(compass, gear, tablets))
-		return calc_science_score(compass, gear, tablets)
+		score = calc_science_score(compass, gear, tablets)
+		#print "%d %d %d -> %d" % (compass, gear, tablets, score)
+		return ((compass, gear, tablets), score)
 	scr_compass = find_best_score(compass + 1, gear, tablets, choice - 1)
 	scr_gear = find_best_score(compass, gear + 1, tablets, choice - 1)
 	scr_tablet = find_best_score(compass, gear, tablets + 1, choice - 1)
-	return sorted([scr_compass, scr_gear, scr_tablet], reverse=True)[0]
+	return sorted([scr_compass, scr_gear, scr_tablet], key=lambda score: score[1], reverse=True)[0]
 
 def score_science(player_cards):
 	count = {}
 	count[SCIENCE_COMPASS] = 0
 	count[SCIENCE_GEAR] = 0
 	count[SCIENCE_TABLET] = 0
-	choice_cards = 0
+	choice_cards = 3
 	for c in player_cards:
 		if c.get_colour() == "GREEN":
 			count[c.get_info()] += 1
@@ -253,6 +271,11 @@ p1 = age_1[0:7] + age_2[0:7] + age_3[0:7]
 p2 = age_1[7:14] + age_2[7:14] + age_3[7:14]
 p3 = age_1[14:21] + age_2[14:21] + age_3[14:21]
 
+players = []
+for i in range(0, PLAYERS):
+	players.append(Player("player %d" % (i + 1)))
+
+print players[0].__dict__
 print score_science(p1)
 print score_military(p1, p2, 3)
 print score_blue(p1)
