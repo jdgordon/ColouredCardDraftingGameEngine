@@ -1,23 +1,27 @@
 #!/usr/bin/python
 import random
+from collections import deque
 
-RESOURCE_MONEY = "$"
-RESOURCE_WOOD = "W"
-RESOURCE_ORE = "O"
-RESOURCE_STONE = "S"
-RESOURCE_BRICK = "B"
-RESOURCE_GLASS = "G"
-RESOURCE_LOOM = "L"
-RESOURCE_PAPER = "P"
+RESOURCE_MONEY 	= "$"
+RESOURCE_WOOD 	= "W"
+RESOURCE_ORE 	= "O"
+RESOURCE_STONE 	= "S"
+RESOURCE_BRICK 	= "B"
+RESOURCE_GLASS 	= "G"
+RESOURCE_LOOM 	= "L"
+RESOURCE_PAPER 	= "P"
 
-SCIENCE_GEAR = "G"
+SCIENCE_GEAR 	= "G"
 SCIENCE_COMPASS = "C"
-SCIENCE_TABLET = "T"
+SCIENCE_TABLET 	= "T"
+
+def sort_cards(cards, reverse=False):
+	return sorted(cards, key=lambda x: x.get_name(), reverse=reverse)
 
 class Player:
 	def __init__(self, name):
 		self.name = name
-		self.money = 3
+		self.money = 8
 		self.tableau = [] # all the players played cards
 		self.military = [] # war wins/losses
 		self.east_trade_prices = {
@@ -30,6 +34,9 @@ class Player:
 			RESOURCE_PAPER: 2
 		}
 		self.west_trade_prices = self.east_trade_prices
+	
+	def is_card_in_tableau(self, card):
+		return find_card(self.tableau, card) != None
 
 	def can_build_with_chain(self, card):
 		for precard in card.prechains:
@@ -38,41 +45,89 @@ class Player:
 		return False
 		
 	def buy_card(self, card, east_player, west_player):
-		cost = card.cost
 		missing = []
 		money_spent = 0
 		trade_east = 0
 		trade_west = 0
-		first_pass = True # Ignore A/B and trades on the first pass
-		used_cards = [] # We can only use a card once (or twice)
-		half_used_cards = []
-		while len(cost):
-			r = cost[0]
-			#print "looking for a", r
-			if r == RESOURCE_MONEY:
-				if self.money - money_spent - trade_east - trade_west < 1:
-					return False # bail early, cant get more money if needed
-				money_spent += 1
-				cost = cost[1:]
-				continue
-			else:
-				# go through the tableau and see what we can afford
-				found = False
-				for c in self.tableau: # FIXME: WONDER too
-					if c not in used_cards and (c.get_colour() == "BROWN" or c.get_colour() == "GREY"):
-						if c.provides_resource(r):
-							used_cards.append(c)
-							cost = cost[1:]
-							found = True
-							break
-				if found:
-					continue
-			missing.append(r)
-			cost = cost[1:]
-		if len(missing) == 0:
-			print "used %d coins, and: " %(money_spent), used_cards
+		options = []
+		for i in range(len(card.cost)):
+			cost = deque(card.cost)
+			cost.rotate(i)
+			x = self._find_resource_cards(list(cost), east_player, west_player, True)
+			if x and x not in options:
+					options.append(x)
+			x = self._find_resource_cards(list(cost), east_player, west_player, False)
+			if x and x not in options:
+					options.append(x)
+		# we now remove any of the optoins which we cant afford to pay for trades
+		for o in options:
+			cost = o.coins
+			for c in o.east_trades:
+				cost += self.east_trade_prices[c.get_info()[0]]
+			for c in o.east_trades:
+				cost += self.west_trade_prices[c.get_info()[0]]
+			if cost > self.money:
+				print cost
+				options.remove(o)
+		return options
+
+	def _find_resource_cards(self, needed_resources, east_cards, west_cards, east_first=True):
+		def __check_tableau(r, tableau, used_cards):
+			for c in tableau: # FIXME: WONDER too
+				if c not in used_cards and (c.get_colour() == "BROWN" or c.get_colour() == "GREY"):
+					count = c.provides_resource(r)
+					if count == 0:
+						continue
+					return (c, count)
+			return (None, 0)
+
+		used_cards = []
+		coins = 0
+		east_trades = []
+		west_trades = []
+		card_sets = [(self.tableau, used_cards)]
+		if east_first:
+			card_sets += [(east_cards, east_trades), (west_cards, west_trades)]
 		else:
-			print "missing: ", missing
+			card_sets += [(west_cards, west_trades), (east_cards, east_trades)]
+		
+		while len(needed_resources):
+			r = needed_resources[0]
+			found = False
+			if r == RESOURCE_MONEY:
+				coins += 1
+				needed_resources.remove(r)
+				continue
+			for cards, used in card_sets:
+				card, count = __check_tableau(r, cards, used)
+				if card and count > 0:
+					found = True
+					used.append(card)
+					for i in range(0, count):
+						if r not in needed_resources:
+							break
+						needed_resources.remove(r)
+					break
+			if not found:
+				return None
+		return CardPurchaseOption(used_cards, coins, east_trades, west_trades)
+							
+			
+class CardPurchaseOption:
+	def __init__(self, cards, coins, east_trades, west_trades):
+		self.cards = cards
+		self.coins = coins
+		self.east_trades = east_trades
+		self.west_trades = west_trades
+
+	def __eq__(self, other):
+		return sort_cards(self.cards) == sort_cards(other.cards) and \
+			self.coins == other.coins and	\
+			sort_cards(self.east_trades) == sort_cards(other.east_trades) and	\
+			sort_cards(self.west_trades) == sort_cards(other.west_trades)
+
+	def __repr__(self):
+		return "{\n\t%s\n\t$%d\n\tEAST:%s\n\tWEST:%s\n}" % (self.cards, self.coins, self.east_trades, self.west_trades)
 
 class Card:
 	def __init__(self, name, age, cost, players):
@@ -85,10 +140,19 @@ class Card:
 			RESOURCE_MONEY, RESOURCE_WOOD, RESOURCE_ORE, 
 			RESOURCE_STONE, RESOURCE_BRICK, RESOURCE_GLASS, 
 			RESOURCE_LOOM, RESOURCE_PAPER]
+		card_cost = {}
 		self.cost = []
+		# This next magic sorts the card cost into an array of required
+		# resources from most to least, i.e ['S', 'S', 'S', 'O']
 		for r in cost:
 			if r in valid_resources:
-				self.cost.append(r)
+				if r in card_cost:
+					card_cost[r] += 1
+				else:
+					card_cost[r] = 1
+		for x in sorted(card_cost.items(),  key=lambda x: x[1], reverse=True):
+			for i in range(0, x[1]):
+				self.cost.append(x[0])
 
 	def parse_chains(self, pre, post):
 		for card in pre.split("|"):
@@ -118,13 +182,16 @@ class Card:
 class BrownCard(Card):
 	valid_resources = [RESOURCE_WOOD, RESOURCE_ORE, RESOURCE_STONE, RESOURCE_BRICK]
 	def parse_infotext(self, text):
-		self.resources = []
+		self.resources = {}
 		self.allow_all = True
 		for r in text:
 			if r == "/":
 				self.allow_all = False
 			elif r in self.valid_resources:
-				self.resources.append(r)
+				if r in self.resources:
+					self.resources[r] += 1
+				else:
+					self.resources[r] = 1
 			else:
 				return False
 		return True
@@ -139,7 +206,10 @@ class BrownCard(Card):
 		return text
 	
 	def provides_resource(self, resource):
-		return resource in self.resources
+		if resource in self.resources:
+			return self.resources[resource]
+		else:
+			return 0
 
 	def get_colour(self):
 		return "BROWN"
@@ -283,7 +353,7 @@ def score_science(player_cards):
 	count[SCIENCE_COMPASS] = 0
 	count[SCIENCE_GEAR] = 0
 	count[SCIENCE_TABLET] = 0
-	choice_cards = 3
+	choice_cards = 0
 	for c in player_cards:
 		if c.get_colour() == "GREEN":
 			count[c.get_info()] += 1
@@ -320,6 +390,8 @@ def find_card(cards, name):
 			return c
 	return None
 
+
+
 cards = read_cards_file("7wonders.txt")
 
 PLAYERS = 3
@@ -345,9 +417,11 @@ for i in range(0, PLAYERS):
 	players.append(Player("player %d" % (i + 1)))
 
 p = players[0]
-p.tableau += [cards[0], cards[1], cards[3], find_card(cards, "west trading post")]
+p.tableau += [cards[1], cards[3], find_card(cards, "glassworks")]
 print p.tableau
-print p.can_build_with_chain(find_card(cards, "walls"))
-p.buy_card(find_card(cards, "temple"), None, None)
+
+#print p._find_resource_cards(['W', 'S', 'W'])
+
+print p.buy_card(find_card(cards, "dispensary"), [find_card(cards, "forest cave")], [find_card(cards, "forest cave")])
 
 
