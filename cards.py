@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import random
 
+RESOURCE_MONEY = "$"
 RESOURCE_WOOD = "W"
 RESOURCE_ORE = "O"
 RESOURCE_STONE = "S"
@@ -16,7 +17,7 @@ SCIENCE_TABLET = "T"
 class Player:
 	def __init__(self, name):
 		self.name = name
-		self.money = 0
+		self.money = 3
 		self.tableau = [] # all the players played cards
 		self.military = [] # war wins/losses
 		self.east_trade_prices = {
@@ -30,12 +31,70 @@ class Player:
 		}
 		self.west_trade_prices = self.east_trade_prices
 
+	def can_build_with_chain(self, card):
+		for precard in card.prechains:
+			if find_card(self.tableau, precard):
+				return True
+		return False
+		
+	def buy_card(self, card, east_player, west_player):
+		cost = card.cost
+		missing = []
+		money_spent = 0
+		trade_east = 0
+		trade_west = 0
+		first_pass = True # Ignore A/B and trades on the first pass
+		used_cards = [] # We can only use a card once (or twice)
+		half_used_cards = []
+		while len(cost):
+			r = cost[0]
+			#print "looking for a", r
+			if r == RESOURCE_MONEY:
+				if self.money - money_spent - trade_east - trade_west < 1:
+					return False # bail early, cant get more money if needed
+				money_spent += 1
+				cost = cost[1:]
+				continue
+			else:
+				# go through the tableau and see what we can afford
+				found = False
+				for c in self.tableau: # FIXME: WONDER too
+					if c not in used_cards and (c.get_colour() == "BROWN" or c.get_colour() == "GREY"):
+						if c.provides_resource(r):
+							used_cards.append(c)
+							cost = cost[1:]
+							found = True
+							break
+				if found:
+					continue
+			missing.append(r)
+			cost = cost[1:]
+		if len(missing) == 0:
+			print "used %d coins, and: " %(money_spent), used_cards
+		else:
+			print "missing: ", missing
+
 class Card:
 	def __init__(self, name, age, cost, players):
 		self.name = name
 		self.age = age
 		self.players = players
-		self.cost = cost
+		self.prechains = []
+		self.postchains = []
+		valid_resources = [
+			RESOURCE_MONEY, RESOURCE_WOOD, RESOURCE_ORE, 
+			RESOURCE_STONE, RESOURCE_BRICK, RESOURCE_GLASS, 
+			RESOURCE_LOOM, RESOURCE_PAPER]
+		self.cost = []
+		for r in cost:
+			if r in valid_resources:
+				self.cost.append(r)
+
+	def parse_chains(self, pre, post):
+		for card in pre.split("|"):
+			self.prechains.append(card.strip())
+		for card in post.split("|"):
+			self.postchains.append(card.strip())
 	
 	def parse_infotext(self, text):
 		return True
@@ -50,11 +109,11 @@ class Card:
 	def get_info(self):
 		return ""
 
-	def get_name(self):
+	def __repr__(self):
 		return "[%s] %d+ %s (%s) -> %s" % (self.age, self.players, self.name, self.get_colour(), self.get_info())
 		
-	def __repr__(self):
-		return self.get_name()
+	def get_name(self):
+		return self.name
 
 class BrownCard(Card):
 	valid_resources = [RESOURCE_WOOD, RESOURCE_ORE, RESOURCE_STONE, RESOURCE_BRICK]
@@ -78,6 +137,9 @@ class BrownCard(Card):
 					text += "/"
 			text += r
 		return text
+	
+	def provides_resource(self, resource):
+		return resource in self.resources
 
 	def get_colour(self):
 		return "BROWN"
@@ -194,6 +256,7 @@ def read_cards_file(filename):
 			text = values[7].strip()
 			c = build_card(colour, name, age, cost, players, text)
 			if c:
+				c.parse_chains(prebuilt, postbuilt)
 				cards.append(c)
 	print "Loaded %d cards" % ( len(cards))
 	return cards
@@ -251,6 +314,12 @@ def score_blue(player):
 		score += c.score()
 	return score
 
+def find_card(cards, name):
+	for c in cards:
+		if c.get_name() == name:
+			return c
+	return None
+
 cards = read_cards_file("7wonders.txt")
 
 PLAYERS = 3
@@ -275,10 +344,10 @@ players = []
 for i in range(0, PLAYERS):
 	players.append(Player("player %d" % (i + 1)))
 
-print players[0].__dict__
-print score_science(p1)
-print score_military(p1, p2, 3)
-print score_blue(p1)
-
+p = players[0]
+p.tableau += [cards[0], cards[1], cards[3], find_card(cards, "west trading post")]
+print p.tableau
+print p.can_build_with_chain(find_card(cards, "walls"))
+p.buy_card(find_card(cards, "temple"), None, None)
 
 
