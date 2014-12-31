@@ -112,41 +112,41 @@
 3, 3, siege workshop, red, BBBW, laboratory, -, 3
 3, 3, fortification, red, OOOS, walls, -, 3
 3, 3, arsenal, red, OOWL, -, -, 3
-3, 3, arena, yellow, SSO, dispensary, -, $$$P{yellow}
-3, 3, lighthouse, yellow, SG, carvansery, -, $P{wonder}
-3, 3, haven, yellow, WOL, forum , -, $P{brown}
-3, 1, workers guild, purple, OOBSW, -, -, P{brown} <>
-3, 1, craftsmens guild, purple, OOSS, -, -, PP{grey} <>
-3, 1, shipowners guild, purple, WWWGP, -, -, P{brown | grey | purple}
-3, 1, traders guild, purple, GLP, -, -, P{yellow} <>
-3, 1, magistrates guild, purple, WWWSL, -, -, P{blue} <>
-3, 1, builders guild, purple, SSBBG, -, -, P{wonder} <v>
-3, 1, philosophers guild, purple, BBBPL, -, -, P{green} <>
+3, 3, arena, yellow, SSO, dispensary, -, $$$V{yellow}
+3, 3, lighthouse, yellow, SG, carvansery, -, $V{wonder}
+3, 3, haven, yellow, WOL, forum , -, $V{brown}
+3, 1, workers guild, purple, OOBSW, -, -, V{brown} <>
+3, 1, craftsmens guild, purple, OOSS, -, -, VV{grey} <>
+3, 1, shipowners guild, purple, WWWGP, -, -, V{brown | grey | purple}
+3, 1, traders guild, purple, GLP, -, -, V{yellow} <>
+3, 1, magistrates guild, purple, WWWSL, -, -, V{blue} <>
+3, 1, builders guild, purple, SSBBG, -, -, V{wonder} <v>
+3, 1, philosophers guild, purple, BBBPL, -, -, V{green} <>
 3, 1, scientist guild, purple, WWOOP, -, -, +{C | T | G}
-3, 1, spies guild, purple, BBBG, -, -, P{red} <>
-3, 1, strategists guild, purple, WWSL, -, -, P{war lose} <>
-3, 1, architects guild, purple, OOOBPL, -, -, P{purple} <>
+3, 1, spies guild, purple, BBBG, -, -, V{red} <>
+3, 1, strategists guild, purple, WWSL, -, -, V{war lose} <>
+3, 1, architects guild, purple, OOOBPL, -, -, V{purple} <>
 3, 4, gardens, blue, BBW, statue, -, 5
 3, 4, university, green, WWPG, library, -, T
 3, 4, arsenal, red, OOWL, -, -, 3
 3, 4, circus, red, SSSO, training ground, -, 3
-3, 4, haven, yellow, WOL, forum , -, $P{brown}
-3, 4, chamber of commerce, yellow, BBP, - , -, $$PP{grey}
+3, 4, haven, yellow, WOL, forum , -, $V{brown}
+3, 4, chamber of commerce, yellow, BBP, - , -, $$VV{grey}
 3, 5, senate, blue, WWSO,  library, -, 6
 3, 5, town hall, blue, SSOG, -, -, 6
 3, 5, study, green, WPL, school, -, G
 3, 5, siege workshop, red, BBBW, laboratory, -, 3
 3, 5, circus, red, SSSO, training ground, -, 3
-3, 5, arena, yellow, SSO, dispensary, -, $$$P{yellow}
+3, 5, arena, yellow, SSO, dispensary, -, $$$V{yellow}
 3, 6, town hall, blue, SSOG, -, -, 6
 3, 6, pantheon, blue, BBOGPL, temple, -, 7
 3, 6, lodge, green, BBPL, dispensary, -, C
 3, 6, circus, red, SSSO, training ground, -, 3
-3, 6, lighthouse, yellow, SG, carvansery, -, $P{wonder}
-3, 6, chamber of commerce, yellow, BBP, - , -, $$PP{grey}
+3, 6, lighthouse, yellow, SG, carvansery, -, $V{wonder}
+3, 6, chamber of commerce, yellow, BBP, - , -, $$VV{grey}
 3, 7, palace, blue, SOWBGPL, -, -, 8
 3, 7, observatory, green, OOGL, laboratory, -, G
 3, 7, academy, green, SSSG, school, -, C
 3, 7, fortification, red, OOOS, walls, -, 3
 3, 7, arsenal, red, OOWL, -, -, 3
-3, 7, arena, yellow, SSO, dispensary, -, $$$P{yellow}
+3, 7, arena, yellow, SSO, dispensary, -, $$$V{yellow}
