@@ -6,7 +6,7 @@ from cards import helpers
 from players import *
 
 
-cards = helpers.read_cards_file("7wonders.txt")
+cards = helpers.read_cards_file("card-descriptions.txt")
 
 PLAYERS = 3
 age_1 = [c for c in cards if c.age == 1 and c.players <= PLAYERS]
