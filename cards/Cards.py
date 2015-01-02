@@ -46,7 +46,7 @@ class Card:
 		return ""
 
 	def __repr__(self):
-		return "[%s] %d+ %s (%s) -> %s" % (self.age, self.players, self.name, self.get_colour(), self.get_info())
+		return "%s (%s) -> %s" % (self.name, self.get_colour(), self.get_info())
 		
 	def get_name(self):
 		return self.name

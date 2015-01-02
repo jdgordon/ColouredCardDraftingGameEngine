@@ -107,8 +107,3 @@ def score_blue(player):
 		score += c.score()
 	return score
 
-def find_card(cards, name):
-	for c in cards:
-		if c.get_name() == name:
-			return c
-	return None

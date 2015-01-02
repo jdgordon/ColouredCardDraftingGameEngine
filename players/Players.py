@@ -1,6 +1,8 @@
 
 from collections import deque
+from sys import stdin
 from common import *
+import cards
 
 class Player:
 	def __init__(self, name):
@@ -18,6 +20,41 @@ class Player:
 			RESOURCE_PAPER: 2
 		}
 		self.west_trade_prices = self.east_trade_prices
+		self.wonder = None
+	
+	def play_hand(self, hand):
+		''' return the card and action done'''
+		options = []
+		for card in hand:
+		#	print card, self.is_card_in_tableau(card), self.buy_card(card, [], [])
+			if not self.is_card_in_tableau(card):
+				if self.can_build_with_chain(card):
+					options.append((ACTION_PLAYCARD, card))
+				elif self.buy_card(card, [], []):
+					options.append((ACTION_PLAYCARD, card))
+			options.append((ACTION_DISCARD, card))
+			if True:#self.wonder.built_stages < 3: #FIXMEself.wonder.stages:
+				options.append((ACTION_STAGEWONDER, card))
+		i = 0
+		print "-=================-"
+		for o in options:
+			actions = { ACTION_PLAYCARD:"Play", ACTION_DISCARD:"Discard", ACTION_STAGEWONDER:"Stage" }
+			print "[%d]: %s %s" % (i, actions[o[0]], o[1])
+			i += 1
+		print "-=================-"
+		
+		userinput = int(stdin.readline())
+		return options[userinput]
+	
+	def print_tableau(self):
+		cards = { "BROWN":[], "GREY":[], "BLUE":[], "RED":[], "GREEN":[], "PURPLE":[] }
+		for c in self.tableau:
+		#	cards[c.get_colour()].append(c)
+			print c
+		
+	
+	def set_wonder(self, wonder):
+		self.wonder = wonder
 	
 	def is_card_in_tableau(self, card):
 		return find_card(self.tableau, card) != None
@@ -34,6 +71,8 @@ class Player:
 		trade_east = 0
 		trade_west = 0
 		options = []
+		if len(card.cost) == 0:
+			return CardPurchaseOption([], 0, [], [])
 		for i in range(len(card.cost)):
 			cost = deque(card.cost)
 			cost.rotate(i)
