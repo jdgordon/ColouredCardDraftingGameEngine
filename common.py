@@ -30,6 +30,7 @@ ACTION_STAGEWONDER	= 2
 CARDS_BROWN		= "brown"
 CARDS_GREY 		= "grey"
 CARDS_YELLOW 	= "yellow"
+CARDS_GREEN 	= "green"
 CARDS_BLUE 		= "blue"
 CARDS_RED 		= "red"
 CARDS_PURPLE 	= "purple"

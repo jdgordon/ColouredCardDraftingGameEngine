@@ -53,13 +53,13 @@ class Card:
 	
 	def get_ascii_colour(self):
 		return {
-			"brown": '\033[33m',
-			"grey": '\033[37m',
-			"red": '\033[31m',
-			"green": '\033[92m',
-			"yellow": '\033[1;33m',
-			"blue": '\033[34m',
-			"purple": '\033[35m',
+			CARDS_BROWN: '\033[33m',
+			CARDS_GREY: '\033[37m',
+			CARDS_RED: '\033[31m',
+			CARDS_GREEN: '\033[92m',
+			CARDS_YELLOW: '\033[1;33m',
+			CARDS_BLUE: '\033[34m',
+			CARDS_PURPLE: '\033[35m',
 			}[self.get_colour()]
 	
 	def pretty_print_name(self):
@@ -98,12 +98,12 @@ class BrownCard(Card):
 			return 0
 
 	def get_colour(self):
-		return "brown"
+		return CARDS_BROWN
 		
 class GreyCard(BrownCard):
 	valid_resources = [RESOURCE_GLASS, RESOURCE_LOOM, RESOURCE_PAPER]
 	def get_colour(self):
-		return "grey"
+		return CARDS_GREY
 	
 class BlueCard(Card):
 	def parse_infotext(self, text):
@@ -111,7 +111,7 @@ class BlueCard(Card):
 		return True
 
 	def get_colour(self):
-		return "blue"
+		return CARDS_BLUE
 		
 	def get_info(self):
 		return "%d points" %(self.points)
@@ -130,7 +130,7 @@ class GreenCard(Card):
 		return self.group
 
 	def get_colour(self):
-		return "green"
+		return CARDS_GREEN
 
 class RedCard(Card):
 	def parse_infotext(self, text):
@@ -141,7 +141,7 @@ class RedCard(Card):
 		return "%d" % (self.strength)
 
 	def get_colour(self):
-		return "red"
+		return CARDS_RED
 	
 	def get_strength(self):
 		return self.strength
@@ -190,7 +190,7 @@ class FooPlaceHolderCard(Card):
 		
 class YellowCard(FooPlaceHolderCard):
 	def get_colour(self):
-		return "yellow"
+		return CARDS_YELLOW
 		
 	def play(self, player, east_player, west_player):
 		if self.text[0] == "-": # affects trade values, probably wont scale
@@ -225,7 +225,7 @@ class YellowCard(FooPlaceHolderCard):
 
 class PurpleCard(FooPlaceHolderCard):
 	def get_colour(self):
-		return "purple"
+		return CARDS_PURPLE
 	
 	def gives_science(self):
 		return False

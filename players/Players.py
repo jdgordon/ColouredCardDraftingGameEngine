@@ -41,7 +41,7 @@ class Player:
 		i = 0
 		print "-=================-"
 		
-		options = sorted(options, key=lambda x: {"grey":0, "brown":1, "yellow":2, "blue":3, "red":4, "green":5, "purple":6}[x[1].get_colour()])
+		options = sorted(options, key=lambda x: {CARDS_GREY:0, CARDS_BROWN:1, CARDS_YELLOW:2, CARDS_BLUE:3, CARDS_RED:4, CARDS_GREEN:5, CARDS_PURPLE:6}[x[1].get_colour()])
 		for o in options:
 			actions = { ACTION_PLAYCARD:"Play", ACTION_DISCARD:"Discard", ACTION_STAGEWONDER:"Stage" }
 			print "[%d]: %s %s" % (i, actions[o[0]], o[1].pretty_print_name())
@@ -52,7 +52,7 @@ class Player:
 		return options[userinput]
 	
 	def print_tableau(self):
-		cards = { "brown":[], "grey":[], "blue":[], "red":[], "green":[], "purple":[] }
+		cards = { CARDS_BROWN:[], CARDS_GREY:[], CARDS_BLUE:[], CARDS_RED:[], CARDS_GREEN:[], CARDS_PURPLE:[] }
 		print "You have $", self.money
 		for c in self.get_cards():
 		#	cards[c.get_colour()].append(c)
@@ -103,7 +103,7 @@ class Player:
 	def _find_resource_cards(self, needed_resources, east_cards, west_cards, east_first=True):
 		def __check_tableau(r, tableau, used_cards):
 			for c in tableau: # FIXME: WONDER too
-				if c not in used_cards and (c.get_colour() == "brown" or c.get_colour() == "grey"):
+				if c not in used_cards and (c.get_colour() == CARDS_BROWN or c.get_colour() == CARDS_GREY):
 					count = c.provides_resource(r)
 					if count == 0:
 						continue

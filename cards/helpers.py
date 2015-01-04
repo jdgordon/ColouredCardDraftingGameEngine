@@ -7,13 +7,13 @@ from . import Cards
 
 def build_card(colour, name, age, cost, players, infostr):
 	cardclasses = {
-		"brown": Cards.BrownCard,
-		"grey": Cards.GreyCard,
-		"blue": Cards.BlueCard,
-		"green": Cards.GreenCard,
-		"red": Cards.RedCard,
-		"yellow": Cards.YellowCard,
-		"purple": Cards.PurpleCard
+		CARDS_BROWN: Cards.BrownCard,
+		CARDS_GREY: Cards.GreyCard,
+		CARDS_BLUE: Cards.BlueCard,
+		CARDS_GREEN: Cards.GreenCard,
+		CARDS_RED: Cards.RedCard,
+		CARDS_YELLOW: Cards.YellowCard,
+		CARDS_PURPLE: Cards.PurpleCard
 	}
 		
 	if not colour in cardclasses:
@@ -78,9 +78,9 @@ def score_science(player_cards):
 	count[SCIENCE_TABLET] = 0
 	choice_cards = 0
 	for c in player_cards:
-		if c.get_colour() == "green":
+		if c.get_colour() == CARDS_GREEN:
 			count[c.get_info()] += 1
-		elif c.get_colour() == "purple" and c.gives_science():
+		elif c.get_colour() == CARDS_PURPLE and c.gives_science():
 			choice_cards += 1
 
 	return find_best_score(count[SCIENCE_COMPASS], count[SCIENCE_GEAR], count[SCIENCE_TABLET], choice_cards)
@@ -89,9 +89,9 @@ def score_military(player, opponent, age):
 	my_strength = 0
 	their_strength = 0
 	
-	for c in [c for c in player.get_cards() if c.get_colour() == "red"]:
+	for c in [c for c in player.get_cards() if c.get_colour() == CARDS_RED]:
 		my_strength += c.get_strength()
-	for c in [c for c in opponent.get_cards() if c.get_colour() == "red"]:
+	for c in [c for c in opponent.get_cards() if c.get_colour() == CARDS_RED]:
 		their_strength += c.get_strength()
 	
 	if my_strength > their_strength:
@@ -103,7 +103,7 @@ def score_military(player, opponent, age):
 
 def score_blue(player):
 	score = 0
-	for c in [c for c in player.get_cards() if c.get_colour() == "blue"]:
+	for c in [c for c in player.get_cards() if c.get_colour() == CARDS_BLUE]:
 		score += c.score()
 	return score
 
