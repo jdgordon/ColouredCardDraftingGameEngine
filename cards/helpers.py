@@ -68,7 +68,7 @@ def read_cards_file(filename):
 def calc_science_score(compass, gear, tablets):
 	counts = sorted([compass, gear, tablets], reverse=True)
 	total = 0
-	for i in range(0, 2):
+	for i in range(2):
 		total += counts[i] * counts[i]
 	return 7 * counts[2] + total
 

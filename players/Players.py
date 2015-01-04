@@ -64,11 +64,25 @@ class Player:
 		return options[userinput]
 	
 	def print_tableau(self):
-		cards = { CARDS_BROWN:[], CARDS_GREY:[], CARDS_BLUE:[], CARDS_RED:[], CARDS_GREEN:[], CARDS_PURPLE:[] }
-		print "You have $", self.money
+		cards = { CARDS_BROWN:[], CARDS_GREY:[], CARDS_YELLOW:[], CARDS_BLUE:[], CARDS_RED:[], CARDS_GREEN:[], CARDS_PURPLE:[] }
+		print "You have $%d" % (self.money)
 		for c in self.get_cards():
-		#	cards[c.get_colour()].append(c)
-			print c.pretty_print_name()
+			cards[c.get_colour()].append(c)
+		
+		biggest_deck = 0
+		for colour in cards.keys():
+			count =  len(cards[colour])
+			if count > biggest_deck:
+				biggest_deck = count
+		for i in range(biggest_deck):
+			line = { CARDS_BROWN:"\t", CARDS_GREY:"\t", CARDS_YELLOW:"\t", CARDS_BLUE:"\t", CARDS_RED:"\t", CARDS_GREEN:"\t", CARDS_PURPLE:"\t" }
+			for colour in [CARDS_BROWN, CARDS_GREY, CARDS_YELLOW, CARDS_BLUE, CARDS_RED, CARDS_GREEN, CARDS_PURPLE]:
+				if len(cards[colour]) > biggest_deck - 1 - i:
+					line[colour] = cards[colour][biggest_deck - 1 - i].pretty_print_name()
+				else:
+					line[colour] = "        "
+			
+			print "%s\t%s\t%s\t%s\t%s\t%s\t%s" % ( line[CARDS_BROWN], line[CARDS_GREY], line[CARDS_YELLOW], line[CARDS_BLUE], line[CARDS_RED], line[CARDS_GREEN],line[CARDS_PURPLE])
 		
 	
 	def set_wonder(self, wonder):
@@ -108,7 +122,6 @@ class Player:
 			for c in o.east_trades:
 				cost += self.west_trade_prices[c.get_info()[0]]
 			if cost > self.money:
-				print cost
 				options.remove(o)
 		return options
 

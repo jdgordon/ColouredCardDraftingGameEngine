@@ -34,7 +34,7 @@ class Card:
 				else:
 					card_cost[r] = 1
 		for x in sorted(card_cost.items(),  key=lambda x: x[1], reverse=True):
-			for i in range(0, x[1]):
+			for i in range(x[1]):
 				self.cost.append(x[0])
 
 	def parse_chains(self, pre, post):
@@ -182,7 +182,7 @@ class FooPlaceHolderCard(Card):
 		start = text.index("{")
 		end = text.index("}")
 		items = text[start + 1:end].split("|")
-		for i in range(0, len(items)):
+		for i in range(len(items)):
 			items[i] = items[i].strip()
 		return (items, text[end + 1:])
 
