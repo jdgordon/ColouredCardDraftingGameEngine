@@ -1,3 +1,5 @@
 This is an implementation of the 7 wonders board game by Antoine Bauza.
 
 It currently isnt very playable!
+
+You can sort of play by running $ ./game.py in the checkout directory.
