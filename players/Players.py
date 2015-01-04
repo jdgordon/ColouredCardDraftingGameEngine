@@ -7,7 +7,7 @@ import cards
 class Player:
 	def __init__(self, name):
 		self.name = name
-		self.money = 8
+		self.money = 3
 		self.tableau = [] # all the players played cards
 		self.military = [] # war wins/losses
 		self.east_trade_prices = {
@@ -19,8 +19,11 @@ class Player:
 			RESOURCE_LOOM: 2,
 			RESOURCE_PAPER: 2
 		}
-		self.west_trade_prices = self.east_trade_prices
+		self.west_trade_prices = self.east_trade_prices.copy()
 		self.wonder = None
+	
+	def get_cards(self):
+		return self.tableau
 	
 	def play_hand(self, hand):
 		''' return the card and action done'''
@@ -33,13 +36,15 @@ class Player:
 				elif self.buy_card(card, [], []):
 					options.append((ACTION_PLAYCARD, card))
 			options.append((ACTION_DISCARD, card))
-			if True:#self.wonder.built_stages < 3: #FIXMEself.wonder.stages:
+			if False:#self.wonder.built_stages < 3: #FIXMEself.wonder.stages:
 				options.append((ACTION_STAGEWONDER, card))
 		i = 0
 		print "-=================-"
+		
+		options = sorted(options, key=lambda x: {"grey":0, "brown":1, "yellow":2, "blue":3, "red":4, "green":5, "purple":6}[x[1].get_colour()])
 		for o in options:
 			actions = { ACTION_PLAYCARD:"Play", ACTION_DISCARD:"Discard", ACTION_STAGEWONDER:"Stage" }
-			print "[%d]: %s %s" % (i, actions[o[0]], o[1])
+			print "[%d]: %s %s" % (i, actions[o[0]], o[1].pretty_print_name())
 			i += 1
 		print "-=================-"
 		
@@ -47,21 +52,22 @@ class Player:
 		return options[userinput]
 	
 	def print_tableau(self):
-		cards = { "BROWN":[], "GREY":[], "BLUE":[], "RED":[], "GREEN":[], "PURPLE":[] }
-		for c in self.tableau:
+		cards = { "brown":[], "grey":[], "blue":[], "red":[], "green":[], "purple":[] }
+		print "You have $", self.money
+		for c in self.get_cards():
 		#	cards[c.get_colour()].append(c)
-			print c
+			print c.pretty_print_name()
 		
 	
 	def set_wonder(self, wonder):
 		self.wonder = wonder
 	
 	def is_card_in_tableau(self, card):
-		return find_card(self.tableau, card) != None
+		return find_card(self.get_cards(), card) != None
 
 	def can_build_with_chain(self, card):
 		for precard in card.prechains:
-			if find_card(self.tableau, precard):
+			if find_card(self.get_cards(), precard):
 				return True
 		return False
 		
@@ -97,7 +103,7 @@ class Player:
 	def _find_resource_cards(self, needed_resources, east_cards, west_cards, east_first=True):
 		def __check_tableau(r, tableau, used_cards):
 			for c in tableau: # FIXME: WONDER too
-				if c not in used_cards and (c.get_colour() == "BROWN" or c.get_colour() == "GREY"):
+				if c not in used_cards and (c.get_colour() == "brown" or c.get_colour() == "grey"):
 					count = c.provides_resource(r)
 					if count == 0:
 						continue
@@ -108,7 +114,7 @@ class Player:
 		coins = 0
 		east_trades = []
 		west_trades = []
-		card_sets = [(self.tableau, used_cards)]
+		card_sets = [(self.get_cards(), used_cards)]
 		if east_first:
 			card_sets += [(east_cards, east_trades), (west_cards, west_trades)]
 		else:

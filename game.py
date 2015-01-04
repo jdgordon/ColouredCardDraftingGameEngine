@@ -47,6 +47,12 @@ class GameState:
 			p %= self.player_count
 			cards = cards[1:]
 	
+	def _get_west_player(self, playerid):
+		return self.players[(playerid + self.player_count - 1) % self.player_count]
+
+	def _get_east_player(self, playerid):
+		return self.players[(playerid + 11) % self.player_count]
+	
 	def play_turn(self, offset):
 		for i in range(0, self.player_count):
 			player = self.players[i]
@@ -56,6 +62,7 @@ class GameState:
 				action, card = player.play_hand(self.decks[deckid])
 				if action == ACTION_PLAYCARD:
 					# see if the player can buy the card
+					card.play(player, self._get_east_player(i), self._get_west_player(i))
 					player.tableau.append(card)
 					break
 				elif action == ACTION_DISCARD:
@@ -69,13 +76,24 @@ class GameState:
 			
 	
 	def game_loop(self):
-		for i in range(0, 1):
-			self.deal_age_cards(i)
+		for age in range(0, 1):
+			self.deal_age_cards(age)
 			offset = 0
-			while len(self.decks[0]):
+			while len(self.decks[0]) > 1:
 				self.play_turn(offset)
 				offset = (offset + 1) % self.player_count
+			# everyone discards the last card
+			for p in range(0, self.player_count):
+				self.discard_pile.append(self.decks[p][0])
 			
+			# score military
+			for p in range(0, self.player_count):
+				west = self._get_west_player(p)
+				east = self._get_east_player(p)
+				player = self.players[p]
+				self.players[p].military.append(helpers.score_military(west, player, age))
+				self.players[p].military.append(helpers.score_military(east, player, age))
+				print self.players[p].military
 
 init_games()
 game = GameState(3)

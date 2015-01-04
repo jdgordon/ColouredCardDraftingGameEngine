@@ -35,7 +35,7 @@ class Card:
 	def parse_infotext(self, text):
 		return True
 	
-	def play(self):
+	def play(self, player, east_player, west_player):
 		''' Called when the card is played onto the table'''
 		pass
 	
@@ -50,6 +50,20 @@ class Card:
 		
 	def get_name(self):
 		return self.name
+	
+	def get_ascii_colour(self):
+		return {
+			"brown": '\033[33m',
+			"grey": '\033[37m',
+			"red": '\033[31m',
+			"green": '\033[92m',
+			"yellow": '\033[1;33m',
+			"blue": '\033[34m',
+			"purple": '\033[35m',
+			}[self.get_colour()]
+	
+	def pretty_print_name(self):
+		return "%s%s%s" % (self.get_ascii_colour(), self.get_name(), '\033[0m')
 
 class BrownCard(Card):
 	valid_resources = [RESOURCE_WOOD, RESOURCE_ORE, RESOURCE_STONE, RESOURCE_BRICK]
@@ -84,12 +98,12 @@ class BrownCard(Card):
 			return 0
 
 	def get_colour(self):
-		return "BROWN"
+		return "brown"
 		
 class GreyCard(BrownCard):
 	valid_resources = [RESOURCE_GLASS, RESOURCE_LOOM, RESOURCE_PAPER]
 	def get_colour(self):
-		return "GREY"
+		return "grey"
 	
 class BlueCard(Card):
 	def parse_infotext(self, text):
@@ -97,7 +111,7 @@ class BlueCard(Card):
 		return True
 
 	def get_colour(self):
-		return "BLUE"
+		return "blue"
 		
 	def get_info(self):
 		return "%d points" %(self.points)
@@ -116,7 +130,7 @@ class GreenCard(Card):
 		return self.group
 
 	def get_colour(self):
-		return "GREEN"
+		return "green"
 
 class RedCard(Card):
 	def parse_infotext(self, text):
@@ -127,7 +141,7 @@ class RedCard(Card):
 		return "%d" % (self.strength)
 
 	def get_colour(self):
-		return "RED"
+		return "red"
 	
 	def get_strength(self):
 		return self.strength
@@ -137,6 +151,37 @@ class FooPlaceHolderCard(Card):
 		self.text = text
 		return True
 	
+	def _get_card_directions(self, text):
+		ret = []
+		for direction in [DIRECTION_EAST, DIRECTION_SELF, DIRECTION_WEST]:
+			if direction in text:
+				ret.append(direction)
+		return ret
+	def _get_money_count(self, text):
+		money = 0
+		while text[0] == RESOURCE_MONEY:
+			money += 1
+			text = text[1:]
+		return (money, text)
+	def _get_squigly_text(self, text):
+		''' returns the array of items inside the {}'s and the text immediatly after'''
+		out = []
+		if not "{" in text:
+			return ([], text)
+		start = text.index("{")
+		end = text.index("}")
+		items = text[start + 1:end].split("|")
+		for i in range(0, len(items)):
+			items[i] = items[i].strip()
+		return (items, text[end + 1:])
+
+	def _count_cards(self, colour, player):
+		count = 0
+		for c in player.tableau:
+			if c.get_colour() == colour:
+				count += 1
+		return count
+
 	def get_info(self):
 		return self.text
 
@@ -145,11 +190,42 @@ class FooPlaceHolderCard(Card):
 		
 class YellowCard(FooPlaceHolderCard):
 	def get_colour(self):
-		return "YELLOW"
+		return "yellow"
+		
+	def play(self, player, east_player, west_player):
+		if self.text[0] == "-": # affects trade values, probably wont scale
+			money, text = self._get_money_count(self.text[1:])
+			resources = []
+			while text[0] != "}":
+				if text[0] in ALL_RESOURCES:
+					resources.append(text[0])
+				text = text[1:]
+			directions = self._get_card_directions(text)
+			if DIRECTION_EAST in directions:
+				for r in resources:
+					player.east_trade_prices[r] -= money
+			if DIRECTION_WEST in directions:
+				for r in resources:
+					player.west_trade_prices[r] -= money
+		elif self.text[0] == RESOURCE_MONEY: # money/points for something
+			money, text = self._get_money_count(self.text[1:])
+			colours, text = self._get_squigly_text(text)
+			directions = self._get_card_directions(text)
+			count = 0
+			for c in colours:
+				if DIRECTION_WEST in directions:
+					count += self._count_cards(c, west_player)
+				if DIRECTION_SELF in directions:
+					count += self._count_cards(c, player)
+				if DIRECTION_EAST in directions:
+					count += self._count_cards(c, east_player)
+			player.money += count * money
+				
+				
 
 class PurpleCard(FooPlaceHolderCard):
 	def get_colour(self):
-		return "PURPLE"
+		return "purple"
 	
 	def gives_science(self):
 		return False
