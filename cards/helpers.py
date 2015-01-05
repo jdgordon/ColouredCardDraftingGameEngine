@@ -73,21 +73,26 @@ def calc_science_score(compass, gear, tablets):
 	return 7 * counts[2] + total
 
 def find_best_score(compass, gear, tablets, choice):
-	if choice == 0:
+	if len(choice) == 0:
 		score = calc_science_score(compass, gear, tablets)
 		#print "%d %d %d -> %d" % (compass, gear, tablets, score)
 		return ((compass, gear, tablets), score)
-	scr_compass = find_best_score(compass + 1, gear, tablets, choice - 1)
-	scr_gear = find_best_score(compass, gear + 1, tablets, choice - 1)
-	scr_tablet = find_best_score(compass, gear, tablets + 1, choice - 1)
-	return sorted([scr_compass, scr_gear, scr_tablet], key=lambda score: score[1], reverse=True)[0]
+	scores = []
+	
+	if SCIENCE_COMPASS in choice[0]:
+		scores.append(find_best_score(compass + 1, gear, tablets, choice[1:]))
+	if SCIENCE_GEAR in choice[0]:
+		scores.append(find_best_score(compass, gear + 1, tablets, choice[1:]))
+	if SCIENCE_COMPASS in choice[0]:
+		scores.append(find_best_score(compass, gear, tablets + 1, choice[1:]))
+	return sorted(scores, key=lambda score: score[1], reverse=True)[0]
 
 def score_science(player):
 	count = {}
 	count[SCIENCE_COMPASS] = 0
 	count[SCIENCE_GEAR] = 0
 	count[SCIENCE_TABLET] = 0
-	choice_cards = 0
+	choice_cards = [] # An array tuples of available choices
 	for c in player.get_cards():
 		if c.get_colour() == CARDS_GREEN:
 			count[c.get_info()] += 1
