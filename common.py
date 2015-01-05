@@ -19,6 +19,9 @@ RESOURCE_GLASS 	= "G"
 RESOURCE_LOOM 	= "L"
 RESOURCE_PAPER 	= "P"
 
+# not really a resource, but close enough
+RESOURCE_VICTORYPOINT = "V"
+
 ALL_RESOURCES = {	\
 	RESOURCE_MONEY, RESOURCE_WOOD, RESOURCE_ORE,	\
 	RESOURCE_STONE, RESOURCE_BRICK, RESOURCE_GLASS,	\
@@ -44,6 +47,10 @@ CARDS_GREEN 	= "green"
 CARDS_BLUE 		= "blue"
 CARDS_RED 		= "red"
 CARDS_PURPLE 	= "purple"
+
+INFOPREFIX_TRADE = "trade"
+INFOPREFIX_PROVIDER = "+"
+
 
 def sort_cards(cards, reverse=False):
 	return sorted(cards, key=lambda x: x.get_name(), reverse=reverse)

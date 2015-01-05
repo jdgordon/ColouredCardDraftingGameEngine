@@ -8,9 +8,9 @@
 1, 3, loom, grey, -, -, -, L
 1, 3, glassworks, grey, -, -, -, G
 1, 3, press, grey, -, -, -, P
-1, 3, east trading post, yellow, -, -, forum, -${WOBS} >
-1, 3, west trading post, yellow, -, -, forum, -${WOBS} <
-1, 3, marketplace, yellow, -, -, caravansery, -${GLP} <>
+1, 3, east trading post, yellow, -, -, forum, trade-${WOBS} >
+1, 3, west trading post, yellow, -, -, forum, trade-${WOBS} <
+1, 3, marketplace, yellow, -, -, caravansery, trade-${GLP} <>
 1, 3, altar, blue, -, -, temple, 2
 1, 3, theatre, blue, -, -, statue, 2
 1, 3, baths, blue, S, -, aqueduct, 3
@@ -39,11 +39,11 @@
 1, 6, loom, grey, -, -, -, L
 1, 6, glassworks, grey, -, -, -, G
 1, 6, press, grey, -, -, -, P
-1, 6, marketplace, yellow, -, -, caravansery, -${GLP} <>
+1, 6, marketplace, yellow, -, -, caravansery, trade-${GLP} <>
 1, 6, theatre, blue, -, -, statue, 2
-1, 7, east trading post, yellow, -, -, forum, -${WOBS} >
-1, 7, west trading post, yellow, -, -, forum, -${WOBS} <
-1, 7, marketplace, yellow, -, -, caravansery, -${GLP} <>
+1, 7, east trading post, yellow, -, -, forum, trade-${WOBS} >
+1, 7, west trading post, yellow, -, -, forum, trade-${WOBS} <
+1, 7, marketplace, yellow, -, -, caravansery, trade-${GLP} <>
 1, 7, tavern, yellow, -, -, -, $$$$$
 1, 7, baths, blue, S, -, aqueduct, 3
 1, 7, pawnshop, blue, -, -, aqueduct, 3
@@ -56,8 +56,8 @@
 2, 3, loom, grey, -, -, -, L
 2, 3, glassworks, grey, -, -, -, G
 2, 3, press, grey, -, -, -, P
-2, 3, caravansery, yellow, WW, marketplace, lighthouse, W/S/O/B
-2, 3, forum, yellow, BB, east trading post | west trading post, haven, G/L/P
+2, 3, caravansery, yellow, WW, marketplace, lighthouse, +resource{W/S/O/B}
+2, 3, forum, yellow, BB, east trading post | west trading post, haven, +resource{G/L/P}
 2, 3, vineyard, yellow, -, -, -, ${brown} <v>
 2, 3, temple, blue, WBG, altar, pantheon, 3
 2, 3, courthouse, blue, BBL, scriptorium, -, 4
@@ -80,18 +80,18 @@
 2, 5, loom, grey, -, -, -, L
 2, 5, glassworks, grey, -, -, -, G
 2, 5, press, grey, -, -, -, P
-2, 5, caravansery, yellow, WW, marketplace, lighthouse, W/S/O/B
+2, 5, caravansery, yellow, WW, marketplace, lighthouse, +resource{W/S/O/B}
 2, 5, courthouse, blue, BBL, scriptorium, -, 4
 2, 5, laboratory, green, BBP, workshop, siege workshop | observatory, G
 2, 5, stables, red, BWO, apothecary, -, 2
-2, 6, caravansery, yellow, WW, marketplace, lighthouse, W/S/O/B
-2, 6, forum, yellow, BB, east trading post | west trading post, haven, G/L/P
+2, 6, caravansery, yellow, WW, marketplace, lighthouse, +resource{W/S/O/B}
+2, 6, forum, yellow, BB, east trading post | west trading post, haven, +resource{G/L/P}
 2, 6, vineyard, yellow, -, -, -, ${brown} <v>
 2, 6, temple, blue, WBG, altar, pantheon, 3
 2, 6, library, green, SSL, scriptorium, senate | university, T
 2, 6, archery range, red, WWO, workshop, -, 2
 2, 6, training ground, red, OOW, -, circus, 2
-2, 7, forum, yellow, BB, east trading post | west trading post, haven, G/L/P
+2, 7, forum, yellow, BB, east trading post | west trading post, haven, +resource{G/L/P}
 2, 7, bazaar, yellow, -, -, -, $${grey} <v>
 2, 7, statue, blue, OOW, theatre, gardens, 4
 2, 7, aqueduct, blue, SSS, baths, -, 5
@@ -122,7 +122,7 @@
 3, 1, magistrates guild, purple, WWWSL, -, -, V{blue} <>
 3, 1, builders guild, purple, SSBBG, -, -, V{wonder} <v>
 3, 1, philosophers guild, purple, BBBPL, -, -, V{green} <>
-3, 1, scientist guild, purple, WWOOP, -, -, +{C | T | G}
+3, 1, scientist guild, purple, WWOOP, -, -, +science{C / T / G}
 3, 1, spies guild, purple, BBBG, -, -, V{red} <>
 3, 1, strategists guild, purple, WWSL, -, -, V{war lose} <>
 3, 1, architects guild, purple, OOOBPL, -, -, V{purple} <>

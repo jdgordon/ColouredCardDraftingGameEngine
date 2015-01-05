@@ -20,8 +20,8 @@ class Card:
 		self.prechains = []
 		self.postchains = []
 		valid_resources = [
-			RESOURCE_MONEY, RESOURCE_WOOD, RESOURCE_ORE, 
-			RESOURCE_STONE, RESOURCE_BRICK, RESOURCE_GLASS, 
+			RESOURCE_MONEY, RESOURCE_WOOD, RESOURCE_ORE,
+			RESOURCE_STONE, RESOURCE_BRICK, RESOURCE_GLASS,
 			RESOURCE_LOOM, RESOURCE_PAPER]
 		card_cost = {}
 		self.cost = []
@@ -42,34 +42,43 @@ class Card:
 			self.prechains.append(card.strip())
 		for card in post.split("|"):
 			self.postchains.append(card.strip())
-	
+
 	def parse_infotext(self, text):
 		return True
-	
+
 	def play(self, player, east_player, west_player):
 		''' Called when the card is played onto the table'''
 		pass
-	
+
 	def get_colour(self):
 		return ""
-		
+
 	def get_info(self):
 		return ""
 
 	def __repr__(self):
 		return "%s (%s) -> %s" % (self.name, self.get_colour(), self.get_info())
-		
+
 	def get_name(self):
 		return self.name
-	
+
 	def get_cost(self):
 		return self.cost
-	
+
 	def get_cost_as_string(self):
 		out = ""
 		for r in self.get_cost():
 			out += r
 		return out
+
+	def is_resource_card(self): #generally brown/grey and some yellow
+		return (False, False) # (resource card, tradeable)
+	def is_science_card(self): # generally green
+		return False
+	def is_war_card(self): # generally red
+		return False
+	def is_guild_card(self): # purple
+		return False
 
 	def get_ascii_colour(self):
 		return {
@@ -81,7 +90,7 @@ class Card:
 			CARDS_BLUE: '\033[34m',
 			CARDS_PURPLE: '\033[35m',
 			}[self.get_colour()]
-	
+
 	def pretty_print_name(self, with_info=True):
 		if with_info:
 			info = " %s" % (self.get_info())
@@ -105,7 +114,7 @@ class BrownCard(Card):
 			else:
 				return False
 		return True
-	
+
 	def get_info(self):
 		text = ""
 		for r in self.resources:
@@ -114,7 +123,7 @@ class BrownCard(Card):
 					text += "/"
 			text += r
 		return text
-	
+
 	def provides_resource(self, resource):
 		if resource in self.resources:
 			return self.resources[resource]
@@ -123,12 +132,15 @@ class BrownCard(Card):
 
 	def get_colour(self):
 		return CARDS_BROWN
-		
+
+	def is_resource_card(self):
+		return (True, True)
+
 class GreyCard(BrownCard):
 	valid_resources = [RESOURCE_GLASS, RESOURCE_LOOM, RESOURCE_PAPER]
 	def get_colour(self):
 		return CARDS_GREY
-	
+
 class BlueCard(Card):
 	def parse_infotext(self, text):
 		self.points = int(text)
@@ -136,7 +148,7 @@ class BlueCard(Card):
 
 	def get_colour(self):
 		return CARDS_BLUE
-		
+
 	def get_info(self):
 		return "%d points" %(self.points)
 
@@ -149,32 +161,38 @@ class GreenCard(Card):
 			self.group = text[0]
 			return True
 		return False
-	
+
 	def get_info(self):
 		return self.group
 
 	def get_colour(self):
 		return CARDS_GREEN
 
+	def is_science_card(self):
+		return True
+
 class RedCard(Card):
 	def parse_infotext(self, text):
 		self.strength = int(text)
 		return True
-	
+
 	def get_info(self):
 		return "%d" % (self.strength)
 
 	def get_colour(self):
 		return CARDS_RED
-	
+
 	def get_strength(self):
 		return self.strength
+
+	def is_war_card(self):
+		return True
 
 class FooPlaceHolderCard(Card):
 	def parse_infotext(self, text):
 		self.text = text
 		return True
-	
+
 	def _get_card_directions(self, text):
 		ret = []
 		for direction in [DIRECTION_EAST, DIRECTION_SELF, DIRECTION_WEST]:
@@ -183,18 +201,24 @@ class FooPlaceHolderCard(Card):
 		return ret
 	def _get_money_count(self, text):
 		money = 0
-		while text[0] == RESOURCE_MONEY:
+		while len(text) and text[0] == RESOURCE_MONEY:
 			money += 1
 			text = text[1:]
 		return (money, text)
-	def _get_squigly_text(self, text):
+	def _get_points_count(self, text):
+		points = 0
+		while len(text) and text[0] == RESOURCE_VICTORYPOINT:
+			points += 1
+			text = text[1:]
+		return (points, text)
+	def _get_squigly_text(self, text, splitter="|"):
 		''' returns the array of items inside the {}'s and the text immediatly after'''
 		out = []
 		if not "{" in text:
 			return ([], text)
 		start = text.index("{")
 		end = text.index("}")
-		items = text[start + 1:end].split("|")
+		items = text[start + 1:end].split(splitter)
 		for i in range(len(items)):
 			items[i] = items[i].strip()
 		return (items, text[end + 1:])
@@ -211,46 +235,113 @@ class FooPlaceHolderCard(Card):
 
 	def get_colour(self):
 		return "-----"
-		
+
+class TradeCardInfo():
+	def __init__(self, value, resources, directions):
+		self.value = value
+		self.resources = resources
+		self.directions = directions
+
+class GainCardInfo():
+	def __init__(self, moneygain, pointsgain, colours, directions):
+		self.money = moneygain
+		self.points = pointsgain
+		self.colours = colours
+		self.directions = directions
+
 class YellowCard(FooPlaceHolderCard):
+	def parse_infotext(self, text):
+		self.colour = CARDS_YELLOW
+		# init the different things this card could be
+		self.trade_card_info = None
+		self.gain_card_info = None
+		self.provides_resources = False
+		self.provides_science = False
+
+		self.text = text
+
+		if text.startswith(INFOPREFIX_TRADE):
+			return self.parse_trade_card(text[len(INFOPREFIX_TRADE):])
+		elif text.startswith(INFOPREFIX_PROVIDER):
+			return self.parse_provider_card(text[len(INFOPREFIX_PROVIDER):])
+		else:
+			return self.parse_gain_card(text)
+		return True
+
 	def get_colour(self):
-		return CARDS_YELLOW
-		
+		return self.colour
+
 	def play(self, player, east_player, west_player):
-		if self.text[0] == "-": # affects trade values, probably wont scale
-			money, text = self._get_money_count(self.text[1:])
-			resources = []
-			while text[0] != "}":
-				if text[0] in ALL_RESOURCES:
-					resources.append(text[0])
-				text = text[1:]
-			directions = self._get_card_directions(text)
-			if DIRECTION_EAST in directions:
-				for r in resources:
-					player.east_trade_prices[r] -= money
-			if DIRECTION_WEST in directions:
-				for r in resources:
-					player.west_trade_prices[r] -= money
-		elif self.text[0] == RESOURCE_MONEY: # money/points for something
-			money, text = self._get_money_count(self.text[1:])
-			colours, text = self._get_squigly_text(text)
-			directions = self._get_card_directions(text)
+		if self.trade_card_info:
+			if DIRECTION_EAST in self.trade_card_info.directions:
+				for r in self.trade_card_info.resources:
+					player.east_trade_prices[r] -= self.trade_card_info.value
+			if DIRECTION_WEST in self.trade_card_info.directions:
+				for r in self.trade_card_info.resources:
+					player.west_trade_prices[r] -= self.trade_card_info.value
+		elif self.gain_card_info:
 			count = 0
-			for c in colours:
-				if DIRECTION_WEST in directions:
+			for c in self.gain_card_info.colours:
+				if DIRECTION_WEST in self.gain_card_info.directions:
 					count += self._count_cards(c, west_player)
-				if DIRECTION_SELF in directions:
+				if DIRECTION_SELF in self.gain_card_info.directions:
 					count += self._count_cards(c, player)
-				if DIRECTION_EAST in directions:
+				if DIRECTION_EAST in self.gain_card_info.directions:
 					count += self._count_cards(c, east_player)
-			player.money += count * money
-				
-				
+			player.money += count * self.gain_card_info.money
+
+
+	def parse_trade_card(self, text):
+		decrement = text[0] == "-"
+		money, text = self._get_money_count(text[1:])
+		resources = []
+		while text[0] != "}":
+			if text[0] in ALL_RESOURCES:
+				resources.append(text[0])
+			text = text[1:]
+		directions = self._get_card_directions(text)
+		if decrement:
+			money *= -1
+		self.trade_card_info = TradeCardInfo(money, resources, directions)
+		return True
+
+	def parse_provider_card(self, text):
+		if text.startswith("resource"):
+			self.provides_resources = True
+		elif text.startswith("science"):
+			self.provides_science = True
+
+		self.provisions, text = self._get_squigly_text(text, splitter="/")
+		return True
+
+	def is_resource_card(self):
+		return (self.provides_resource, False)
+
+	def provides_resource(self, resource):
+		if self.provides_resources and resource in self.provisions:
+			return 1
+		return 0
+
+	def is_science_card(self):
+		return self.provides_science
+
+	def parse_gain_card(self, text):
+		money, text = self._get_money_count(text)
+		points, text = self._get_points_count(text)
+		colours, text = self._get_squigly_text(text)
+		directions = self._get_card_directions(text)
+		if len(directions) == 0:
+			directions.append(DIRECTION_SELF)
+		self.gain_card_info = GainCardInfo(money, points, colours, directions)
+		return True
 
 class PurpleCard(FooPlaceHolderCard):
 	def get_colour(self):
 		return CARDS_PURPLE
-	
+
 	def gives_science(self):
 		return False
+
+	def is_guild_card(self):
+		return True
 

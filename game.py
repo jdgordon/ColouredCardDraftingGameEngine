@@ -131,14 +131,17 @@ class GameState:
 		for i in range(self.player_count):
 			player = self.players[i]
 			score = 0
-			score += helpers.score_blue(player)
+			bluescore = helpers.score_blue(player)
 			(_,_,_,), greenscore = helpers.score_science(player)
 			score += greenscore
+			redscore = 0
 			for military in player.military:
-				score += military
+				redscore += military
+			moneyscore = player.money / 3
 			# TODO: score yellow, purple
 			player.print_tableau()
-			print "Final score: ", score
+			totalscore = bluescore + greenscore + redscore + moneyscore
+			print "Final score: Blue: %d, Green: %d, red: %d, $: %d, total: %d\n" % (bluescore, greenscore, redscore, moneyscore, totalscore)
 			
 
 init_games()

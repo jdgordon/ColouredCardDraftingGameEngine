@@ -41,7 +41,7 @@ class Player:
 		''' return the card and action done'''
 		options = []
 		for card in hand:
-		#	print card, self.is_card_in_tableau(card), self.buy_card(card, [], [])
+			print card.get_name(), self.is_card_in_tableau(card)
 			if not self.is_card_in_tableau(card):
 				if self.can_build_with_chain(card):
 					options.append((ACTION_PLAYCARD, card))
@@ -61,8 +61,8 @@ class Player:
 			i += 1
 		print "-=================-"
 		
-		userinput = int(stdin.readline())
-		return options[userinput]
+		#userinput = int(stdin.readline())
+		return options[0]
 	
 	def print_tableau(self):
 		cards = { CARDS_BROWN:[], CARDS_GREY:[], CARDS_YELLOW:[], CARDS_BLUE:[], CARDS_RED:[], CARDS_GREEN:[], CARDS_PURPLE:[] }
@@ -113,7 +113,7 @@ class Player:
 				x = self._find_resource_cards(list(cost), west_player.get_cards(), east_player.get_cards(), east_first)
 				if x and x not in options:
 						options.append(x)
-		# we now remove any of the optoins which we cant afford to pay for trades
+		# we now remove any of the options which we cant afford to pay for trades
 		for o in options:
 			cost = o.coins
 			for c in o.east_trades:
@@ -127,24 +127,26 @@ class Player:
 		return [sorted(options, key=lambda x: x.total_cost)]
 
 	def _find_resource_cards(self, needed_resources, west_cards, east_cards, east_first=True):
-		def __check_tableau(r, tableau, used_cards):
+		def __check_tableau(r, tableau, used_cards, tradeable_only):
 			for c in tableau: # FIXME: WONDER too
-				if c not in used_cards and (c.get_colour() == CARDS_BROWN or c.get_colour() == CARDS_GREY):
-					count = c.provides_resource(r)
-					if count == 0:
-						continue
-					return (c, count)
+				if c not in used_cards:
+					is_resource, tradeable = c.is_resource_card()
+					if is_resource and ((not tradeable_only) or (tradeable_only == tradeable)):
+						count = c.provides_resource(r)
+						if count == 0:
+							continue
+						return (c, count)
 			return (None, 0)
 
 		used_cards = []
 		coins = 0
 		east_trades = []
 		west_trades = []
-		card_sets = [(self.get_cards(), used_cards)]
+		card_sets = [(self.get_cards(), used_cards, False)]
 		if east_first:
-			card_sets += [(east_cards, east_trades), (west_cards, west_trades)]
+			card_sets += [(east_cards, east_trades, True), (west_cards, west_trades, True)]
 		else:
-			card_sets += [(west_cards, west_trades), (east_cards, east_trades)]
+			card_sets += [(west_cards, west_trades, True), (east_cards, east_trades, True)]
 		
 		while len(needed_resources):
 			r = needed_resources[0]
@@ -153,8 +155,8 @@ class Player:
 				coins += 1
 				needed_resources.remove(r)
 				continue
-			for cards, used in card_sets:
-				card, count = __check_tableau(r, cards, used)
+			for cards, used, tradeable_only in card_sets:
+				card, count = __check_tableau(r, cards, used, tradeable_only)
 				if card and count > 0:
 					found = True
 					used.append(card)

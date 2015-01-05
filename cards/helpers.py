@@ -24,7 +24,7 @@ def build_card(colour, name, age, cost, players, infostr):
 		CARDS_GREEN: Cards.GreenCard,
 		CARDS_RED: Cards.RedCard,
 		CARDS_YELLOW: Cards.YellowCard,
-		CARDS_PURPLE: Cards.PurpleCard
+		CARDS_PURPLE: Cards.YellowCard
 	}
 		
 	if not colour in cardclasses:
@@ -33,6 +33,8 @@ def build_card(colour, name, age, cost, players, infostr):
 	card = cardclasses[colour](name, age, cost, players)
 
 	if card != None and card.parse_infotext(infostr):
+		if colour == CARDS_PURPLE:
+			card.colour = CARDS_PURPLE
 		return card
 	
 	print "Error loading card:", name
@@ -96,8 +98,8 @@ def score_science(player):
 	for c in player.get_cards():
 		if c.get_colour() == CARDS_GREEN:
 			count[c.get_info()] += 1
-		elif c.get_colour() == CARDS_PURPLE and c.gives_science():
-			choice_cards += 1
+		elif c.is_science_card():
+			choice_cards.append((c.provisions))
 
 	return find_best_score(count[SCIENCE_COMPASS], count[SCIENCE_GEAR], count[SCIENCE_TABLET], choice_cards)
 	
