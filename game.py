@@ -137,6 +137,7 @@ class GameState:
 			for military in player.military:
 				score += military
 			# TODO: score yellow, purple
+			player.print_tableau()
 			print "Final score: ", score
 			
 

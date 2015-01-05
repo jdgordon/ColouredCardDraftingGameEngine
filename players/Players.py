@@ -90,7 +90,7 @@ class Player:
 		self.wonder = wonder
 	
 	def is_card_in_tableau(self, card):
-		return find_card(self.get_cards(), card) != None
+		return find_card(self.get_cards(), card.get_name()) != None
 
 	def can_build_with_chain(self, card):
 		for precard in card.prechains:
