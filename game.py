@@ -62,7 +62,7 @@ class GameState:
 		return self.players[(playerid + self.player_count - 1) % self.player_count]
 
 	def _get_east_player(self, playerid):
-		return self.players[(playerid + 11) % self.player_count]
+		return self.players[(playerid + 1) % self.player_count]
 	
 	def play_turn(self, offset):
 		for i in range(self.player_count):
@@ -126,10 +126,12 @@ class GameState:
 				west = self._get_west_player(p)
 				east = self._get_east_player(p)
 				player = self.players[p]
-				self.players[p].military.append(helpers.score_military(west, player, age))
-				self.players[p].military.append(helpers.score_military(east, player, age))
+				self.players[p].military.append(helpers.score_military(player, west, age))
+				self.players[p].military.append(helpers.score_military(player, east, age))
 		for i in range(self.player_count):
 			player = self.players[i]
+			west = self._get_west_player(i)
+			east = self._get_east_player(i)
 			score = 0
 			bluescore = helpers.score_blue(player)
 			(_,_,_,), greenscore = helpers.score_science(player)
@@ -138,13 +140,17 @@ class GameState:
 			for military in player.military:
 				redscore += military
 			moneyscore = player.money / 3
-			# TODO: score yellow, purple
+			yellowscore = helpers.score_yellow(player, west, east)
+			purplescore = helpers.score_purple(player, west, east)
 			player.print_tableau()
-			totalscore = bluescore + greenscore + redscore + moneyscore
-			print "Final score: Blue: %d, Green: %d, red: %d, $: %d, total: %d\n" % (bluescore, greenscore, redscore, moneyscore, totalscore)
+			totalscore = bluescore + greenscore + redscore + moneyscore + yellowscore + purplescore
+			print "Final score: Blue: %d, Green: %d, red: %d, yellow: %d, purple: %d, $: %d, total: %d\n" % (bluescore, greenscore, redscore, yellowscore, purplescore, moneyscore, totalscore)
 			
 
 init_games()
 game = GameState(3)
 game.setup_age_cards(__all_cards)
 game.game_loop()
+
+#game.players[0].tableau += [find_card(__all_cards, "study"), find_card(__all_cards, "lodge"), find_card(__all_cards, "scientist guild")]
+#print helpers.score_science(game.players[0])

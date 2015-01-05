@@ -70,7 +70,7 @@ def read_cards_file(filename):
 def calc_science_score(compass, gear, tablets):
 	counts = sorted([compass, gear, tablets], reverse=True)
 	total = 0
-	for i in range(2):
+	for i in range(3):
 		total += counts[i] * counts[i]
 	return 7 * counts[2] + total
 
@@ -80,12 +80,11 @@ def find_best_score(compass, gear, tablets, choice):
 		#print "%d %d %d -> %d" % (compass, gear, tablets, score)
 		return ((compass, gear, tablets), score)
 	scores = []
-	
 	if SCIENCE_COMPASS in choice[0]:
 		scores.append(find_best_score(compass + 1, gear, tablets, choice[1:]))
 	if SCIENCE_GEAR in choice[0]:
 		scores.append(find_best_score(compass, gear + 1, tablets, choice[1:]))
-	if SCIENCE_COMPASS in choice[0]:
+	if SCIENCE_TABLET in choice[0]:
 		scores.append(find_best_score(compass, gear, tablets + 1, choice[1:]))
 	return sorted(scores, key=lambda score: score[1], reverse=True)[0]
 
@@ -106,6 +105,7 @@ def score_science(player):
 def score_military(player, opponent, age):
 	my_strength = 0
 	their_strength = 0
+	points = 0
 	
 	for c in [c for c in player.get_cards() if c.get_colour() == CARDS_RED]:
 		my_strength += c.get_strength()
@@ -113,11 +113,11 @@ def score_military(player, opponent, age):
 		their_strength += c.get_strength()
 	
 	if my_strength > their_strength:
-		return [1,3,5][age]
+		points = [1,3,5][age]
 	elif my_strength < their_strength:
-		return -1
-	else:
-		return 0
+		points = -1
+	#print "WAR: %s: %d %s %d -> %d\b" % (player.name, my_strength, opponent.name, their_strength, points)
+	return points
 
 def score_blue(player):
 	score = 0
@@ -125,3 +125,14 @@ def score_blue(player):
 		score += c.score()
 	return score
 
+def score_yellow(player, west_player, east_player):
+	score = 0
+	for c in [c for c in player.get_cards() if c.get_colour() == CARDS_YELLOW]:
+		score += c.score(player, west_player, east_player)
+	return score
+
+def score_purple(player, west_player, east_player):
+	score = 0
+	for c in [c for c in player.get_cards() if c.get_colour() == CARDS_PURPLE]:
+		score += c.score(player, west_player, east_player)
+	return score

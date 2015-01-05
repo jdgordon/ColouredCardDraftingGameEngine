@@ -67,6 +67,7 @@ class Player:
 	def print_tableau(self):
 		cards = { CARDS_BROWN:[], CARDS_GREY:[], CARDS_YELLOW:[], CARDS_BLUE:[], CARDS_RED:[], CARDS_GREEN:[], CARDS_PURPLE:[] }
 		print "You have $%d" % (self.money)
+		print "War points: %s" % (self.military)
 		for c in self.get_cards():
 			cards[c.get_colour()].append(c)
 		

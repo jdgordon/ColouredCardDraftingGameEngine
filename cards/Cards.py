@@ -46,7 +46,7 @@ class Card:
 	def parse_infotext(self, text):
 		return True
 
-	def play(self, player, east_player, west_player):
+	def play(self, player, west_player, east_player):
 		''' Called when the card is played onto the table'''
 		pass
 
@@ -225,9 +225,21 @@ class FooPlaceHolderCard(Card):
 
 	def _count_cards(self, colour, player):
 		count = 0
-		for c in player.tableau:
-			if c.get_colour() == colour:
-				count += 1
+		# check special cases
+		if colour == "war lose":
+			for warscore in player.military:
+				if warscore < 0:
+					count += 1
+		elif colour == "war win":
+			for warscore in player.military:
+				if warscore > 0:
+					count += 1
+		#elif colour == "wonder":
+		#	count = player.wonder.built_stages
+		else:
+			for c in player.get_cards():
+				if c.get_colour() == colour:
+					count += 1
 		return count
 
 	def get_info(self):
@@ -290,6 +302,19 @@ class YellowCard(FooPlaceHolderCard):
 					count += self._count_cards(c, east_player)
 			player.money += count * self.gain_card_info.money
 
+	def score(self, player, west_player, east_player):
+		if self.gain_card_info:
+			count = 0
+			for c in self.gain_card_info.colours:
+				print c, count
+				if DIRECTION_WEST in self.gain_card_info.directions:
+					count += self._count_cards(c, west_player)
+				if DIRECTION_SELF in self.gain_card_info.directions:
+					count += self._count_cards(c, player)
+				if DIRECTION_EAST in self.gain_card_info.directions:
+					count += self._count_cards(c, east_player)
+			return count * self.gain_card_info.points
+		return 0
 
 	def parse_trade_card(self, text):
 		decrement = text[0] == "-"
