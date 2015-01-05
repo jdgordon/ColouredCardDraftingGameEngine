@@ -37,7 +37,7 @@ class Player:
 	def get_cards(self):
 		return self.tableau
 	
-	def play_hand(self, hand):
+	def play_hand(self, hand, west_player, east_player):
 		''' return the card and action done'''
 		options = []
 		for card in hand:
@@ -45,7 +45,7 @@ class Player:
 			if not self.is_card_in_tableau(card):
 				if self.can_build_with_chain(card):
 					options.append((ACTION_PLAYCARD, card))
-				elif self.buy_card(card, [], []):
+				elif self.buy_card(card, west_player, east_player):
 					options.append((ACTION_PLAYCARD, card))
 			options.append((ACTION_DISCARD, card))
 			if False:#self.wonder.built_stages < 3: #FIXMEself.wonder.stages:
@@ -56,7 +56,8 @@ class Player:
 		options = sorted(options, key=lambda x: {CARDS_GREY:0, CARDS_BROWN:1, CARDS_YELLOW:2, CARDS_BLUE:3, CARDS_RED:4, CARDS_GREEN:5, CARDS_PURPLE:6}[x[1].get_colour()])
 		for o in options:
 			actions = { ACTION_PLAYCARD:"Play", ACTION_DISCARD:"Discard", ACTION_STAGEWONDER:"Stage" }
-			print "[%d]: %s %s" % (i, actions[o[0]], o[1].pretty_print_name())
+			card = o[1]
+			print "[%d]: %s\t%s\t%s" % (i, actions[o[0]], card.get_cost_as_string(), card.pretty_print_name())
 			i += 1
 		print "-=================-"
 		
@@ -78,7 +79,7 @@ class Player:
 			line = { CARDS_BROWN:"\t", CARDS_GREY:"\t", CARDS_YELLOW:"\t", CARDS_BLUE:"\t", CARDS_RED:"\t", CARDS_GREEN:"\t", CARDS_PURPLE:"\t" }
 			for colour in [CARDS_BROWN, CARDS_GREY, CARDS_YELLOW, CARDS_BLUE, CARDS_RED, CARDS_GREEN, CARDS_PURPLE]:
 				if len(cards[colour]) > biggest_deck - 1 - i:
-					line[colour] = cards[colour][biggest_deck - 1 - i].pretty_print_name()
+					line[colour] = "%s" % (cards[colour][biggest_deck - 1 - i].pretty_print_name())
 				else:
 					line[colour] = "        "
 			
@@ -97,7 +98,7 @@ class Player:
 				return True
 		return False
 		
-	def buy_card(self, card, east_player, west_player):
+	def buy_card(self, card, west_player, east_player):
 		missing = []
 		money_spent = 0
 		trade_east = 0
@@ -108,12 +109,10 @@ class Player:
 		for i in range(len(card.cost)):
 			cost = deque(card.cost)
 			cost.rotate(i)
-			x = self._find_resource_cards(list(cost), east_player, west_player, True)
-			if x and x not in options:
-					options.append(x)
-			x = self._find_resource_cards(list(cost), east_player, west_player, False)
-			if x and x not in options:
-					options.append(x)
+			for east_first in [True, False]:
+				x = self._find_resource_cards(list(cost), west_player.get_cards(), east_player.get_cards(), east_first)
+				if x and x not in options:
+						options.append(x)
 		# we now remove any of the optoins which we cant afford to pay for trades
 		for o in options:
 			cost = o.coins
@@ -123,9 +122,11 @@ class Player:
 				cost += self.west_trade_prices[c.get_info()[0]]
 			if cost > self.money:
 				options.remove(o)
-		return options
+			else:
+				o.total_cost = cost
+		return [sorted(options, key=lambda x: x.total_cost)]
 
-	def _find_resource_cards(self, needed_resources, east_cards, west_cards, east_first=True):
+	def _find_resource_cards(self, needed_resources, west_cards, east_cards, east_first=True):
 		def __check_tableau(r, tableau, used_cards):
 			for c in tableau: # FIXME: WONDER too
 				if c not in used_cards and (c.get_colour() == CARDS_BROWN or c.get_colour() == CARDS_GREY):
@@ -164,21 +165,22 @@ class Player:
 					break
 			if not found:
 				return None
-		return CardPurchaseOption(used_cards, coins, east_trades, west_trades)
+		return CardPurchaseOption(used_cards, coins, west_trades, east_trades)
 							
 			
 class CardPurchaseOption:
-	def __init__(self, cards, coins, east_trades, west_trades):
+	def __init__(self, cards, coins, west_trades, east_trades):
 		self.cards = cards
 		self.coins = coins
-		self.east_trades = east_trades
 		self.west_trades = west_trades
+		self.east_trades = east_trades
+		self.total_cost = 0
 
 	def __eq__(self, other):
 		return sort_cards(self.cards) == sort_cards(other.cards) and \
 			self.coins == other.coins and	\
-			sort_cards(self.east_trades) == sort_cards(other.east_trades) and	\
-			sort_cards(self.west_trades) == sort_cards(other.west_trades)
+			sort_cards(self.west_trades) == sort_cards(other.west_trades) and	\
+			sort_cards(self.east_trades) == sort_cards(other.east_trades)
 
 	def __repr__(self):
-		return "{\n\t%s\n\t$%d\n\tEAST:%s\n\tWEST:%s\n}" % (self.cards, self.coins, self.east_trades, self.west_trades)
+		return "{\n\t%s\n\t$%d\n\tWEST:%s\n\tEAST:%s\n}" % (self.cards, self.coins, self.west_trades, self.east_trades)

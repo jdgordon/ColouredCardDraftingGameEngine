@@ -67,6 +67,8 @@ class GameState:
 	def play_turn(self, offset):
 		for i in range(self.player_count):
 			player = self.players[i]
+			west_player = self._get_west_player(i)
+			east_player = self._get_east_player(i)
 			deckid = (i + offset) % self.player_count
 			player.print_tableau()
 			# This loop is actually wrong.
@@ -74,12 +76,30 @@ class GameState:
 			# validates the move is legal, then each player plays the card
 			# Then each player adds the new card to their tableau
 			while True:
-				action, card = player.play_hand(self.decks[deckid])
+				action, card = player.play_hand(self.decks[deckid], west_player, east_player)
 				if action == ACTION_PLAYCARD:
+					can_buy = False
 					# see if the player can buy the card
-					card.play(player, self._get_east_player(i), self._get_west_player(i))
-					player.get_cards().append(card)
-					break
+					if player.can_build_with_chain(card):
+						can_buy = True
+					else:
+						can_buy = True # fixme
+						#buy_options = player.buy_card(card, west_player, east_player)
+						#if buy_options == None:
+						#	continue
+						#player.money -= buy_options[0].total_cost
+						#cost = 0
+						#for c in buy_options[0].east_trades:
+						#	cost += player.east_trade_prices[c.get_info()[0]]
+						#east_player.money += cost
+						#cost = 0
+						#for c in buy_options[0].east_trades:
+						#	cost += player.west_trade_prices[c.get_info()[0]]
+						#west_player.money += cost
+					if can_buy:
+						card.play(player, west_player, east_player)
+						player.get_cards().append(card)
+						break
 				elif action == ACTION_DISCARD:
 					self.discard_pile.append(card)
 					player.money += 3

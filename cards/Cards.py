@@ -62,6 +62,15 @@ class Card:
 	def get_name(self):
 		return self.name
 	
+	def get_cost(self):
+		return self.cost
+	
+	def get_cost_as_string(self):
+		out = ""
+		for r in self.get_cost():
+			out += r
+		return out
+
 	def get_ascii_colour(self):
 		return {
 			CARDS_BROWN: '\033[33m',
@@ -73,8 +82,12 @@ class Card:
 			CARDS_PURPLE: '\033[35m',
 			}[self.get_colour()]
 	
-	def pretty_print_name(self):
-		return "%s%s%s" % (self.get_ascii_colour(), self.get_name(), '\033[0m')
+	def pretty_print_name(self, with_info=True):
+		if with_info:
+			info = " %s" % (self.get_info())
+		else:
+			info = ""
+		return "%s%s%s%s" % (self.get_ascii_colour(), self.get_name(), info, '\033[0m')
 
 class BrownCard(Card):
 	valid_resources = [RESOURCE_WOOD, RESOURCE_ORE, RESOURCE_STONE, RESOURCE_BRICK]
