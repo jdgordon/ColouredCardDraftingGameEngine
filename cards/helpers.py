@@ -82,13 +82,13 @@ def find_best_score(compass, gear, tablets, choice):
 	scr_tablet = find_best_score(compass, gear, tablets + 1, choice - 1)
 	return sorted([scr_compass, scr_gear, scr_tablet], key=lambda score: score[1], reverse=True)[0]
 
-def score_science(player_cards):
+def score_science(player):
 	count = {}
 	count[SCIENCE_COMPASS] = 0
 	count[SCIENCE_GEAR] = 0
 	count[SCIENCE_TABLET] = 0
 	choice_cards = 0
-	for c in player_cards:
+	for c in player.get_cards():
 		if c.get_colour() == CARDS_GREEN:
 			count[c.get_info()] += 1
 		elif c.get_colour() == CARDS_PURPLE and c.gives_science():

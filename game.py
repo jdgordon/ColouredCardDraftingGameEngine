@@ -128,7 +128,17 @@ class GameState:
 				player = self.players[p]
 				self.players[p].military.append(helpers.score_military(west, player, age))
 				self.players[p].military.append(helpers.score_military(east, player, age))
-				print self.players[p].military
+		for i in range(self.player_count):
+			player = self.players[i]
+			score = 0
+			score += helpers.score_blue(player)
+			(_,_,_,), greenscore = helpers.score_science(player)
+			score += greenscore
+			for military in player.military:
+				score += military
+			# TODO: score yellow, purple
+			print "Final score: ", score
+			
 
 init_games()
 game = GameState(3)
