@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 #
 # Copyright 2015 - Jonathan Gordon
@@ -36,6 +35,9 @@ class Player:
 	
 	def set_personality(self, persona):
 		self.personality = persona
+	
+	def get_name(self):
+		return self.name
 	
 	def get_cards(self):
 		return self.tableau

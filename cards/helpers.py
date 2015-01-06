@@ -117,7 +117,7 @@ def score_military(player, opponent, age):
 	elif my_strength < their_strength:
 		points = -1
 	#print "WAR: %s: %d %s %d -> %d\b" % (player.name, my_strength, opponent.name, their_strength, points)
-	return points
+	return (my_strength, their_strength, points)
 
 def score_blue(player):
 	score = 0

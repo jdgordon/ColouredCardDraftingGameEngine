@@ -15,6 +15,7 @@ import random
 from common import *
 from cards import helpers
 from players import *
+import logger
 
 def init_games():
 	global __all_cards
@@ -25,14 +26,17 @@ def init_games():
 
 class GameState:
 	def __init__(self, players):
+
 		self.player_count = len(players)
 		self.players = []
 		self.ages = []
 		self.decks = [[]] * len(players)
 		self.discard_pile = []
+		self.logger = logger.Logger()
 		for i in range(len(players)):
-			self.players.append(Players.Player("player %d" % (i + 1)))
-			self.players[i].set_personality(players[i]())
+			name, persona = players[i]
+			self.players.append(Players.Player(name))
+			self.players[i].set_personality(persona())
 		
 	def setup_age_cards(self, cards):
 		age_1 = [c for c in cards if c.age == 1 and c.players <= self.player_count]
@@ -83,10 +87,12 @@ class GameState:
 					# see if the player can buy the card
 					if player.can_build_with_chain(card):
 						can_buy = True
+						self.logger.log_buy_card_with_chain(player, card)
 					else:
 						buy_options = player.buy_card(card, west_player, east_player)
 						if len(buy_options) == 0:
 							continue
+						self.logger.log_buy_card(player, card, buy_options[0])
 						can_buy = True
 						player.money -= buy_options[0].total_cost
 						east_player.money += buy_options[0].east_cost
@@ -96,10 +102,12 @@ class GameState:
 						player.get_cards().append(card)
 						break
 				elif action == ACTION_DISCARD:
+					self.logger.log_action(player, action, card)
 					self.discard_pile.append(card)
 					player.money += 3
 					break
 				elif action == ACTION_STAGEWONDER:
+					self.logger.log_action(player, action, card)
 					# make sure we can do that
 					break
 			self.decks[deckid].remove(card)
@@ -107,6 +115,7 @@ class GameState:
 	
 	def game_loop(self):
 		for age in range(3):
+			self.logger.log_age_header(age)
 			self.deal_age_cards(age)
 			offset = 0
 			while len(self.decks[0]) > 1:
@@ -121,8 +130,12 @@ class GameState:
 				west = self._get_west_player(p)
 				east = self._get_east_player(p)
 				player = self.players[p]
-				self.players[p].military.append(helpers.score_military(player, west, age))
-				self.players[p].military.append(helpers.score_military(player, east, age))
+				player_strength, opponent_strength, score = helpers.score_military(player, west, age)
+				self.logger.log_military_battle(player.get_name(), player_strength, west.get_name(), opponent_strength, score)
+				self.players[p].military.append(score)
+				player_strength, opponent_strength, score = helpers.score_military(player, east, age)
+				self.logger.log_military_battle(player.get_name(), player_strength, east.get_name(), opponent_strength, score)
+				self.players[p].military.append(score)
 		for i in range(self.player_count):
 			player = self.players[i]
 			west = self._get_west_player(i)
@@ -139,11 +152,17 @@ class GameState:
 			purplescore = helpers.score_purple(player, west, east)
 			player.print_tableau()
 			totalscore = bluescore + greenscore + redscore + moneyscore + yellowscore + purplescore
-			print "Final score: Blue: %d, Green: %d, red: %d, yellow: %d, purple: %d, $: %d, total: %d\n" % (bluescore, greenscore, redscore, yellowscore, purplescore, moneyscore, totalscore)
-			
+			text = "Final score: Blue: %d, Green: %d, red: %d, yellow: %d, purple: %d, $: %d, total: %d" % (bluescore, greenscore, redscore, yellowscore, purplescore, moneyscore, totalscore)
+			self.logger.log_freetext(player.get_name() + " " + text)
+			print text
+		
+		logfile = open("logfile.txt", "w")
+		self.logger.dump(logfile)
+		logfile.close()
 
 init_games()
-game = GameState([Personalities.StupidAI, Personalities.StupidAI, Personalities.StupidAI])
+game = GameState([("alice", Personalities.StupidAI), ("Bob", Personalities.StupidAI), ("Frank", Personalities.StupidAI)])
+game.logger.card_list = __all_cards
 game.setup_age_cards(__all_cards)
 game.game_loop()
 
