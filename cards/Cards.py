@@ -121,7 +121,7 @@ class BrownCard(Card):
 			if len(text) != 0:
 				if self.allow_all == False:
 					text += "/"
-			text += r
+			text += r * self.resources[r]
 		return text
 
 	def provides_resource(self, resource):
@@ -287,10 +287,11 @@ class YellowCard(FooPlaceHolderCard):
 		if self.trade_card_info:
 			if DIRECTION_EAST in self.trade_card_info.directions:
 				for r in self.trade_card_info.resources:
-					player.east_trade_prices[r] -= self.trade_card_info.value
+					player.east_trade_prices[r] += self.trade_card_info.value
 			if DIRECTION_WEST in self.trade_card_info.directions:
 				for r in self.trade_card_info.resources:
-					player.west_trade_prices[r] -= self.trade_card_info.value
+					player.west_trade_prices[r] += self.trade_card_info.value
+			print "TRADE: ", player.east_trade_prices, player.west_trade_prices
 		elif self.gain_card_info:
 			count = 0
 			for c in self.gain_card_info.colours:

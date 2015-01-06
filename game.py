@@ -85,18 +85,12 @@ class GameState:
 						can_buy = True
 					else:
 						can_buy = True # fixme
-						#buy_options = player.buy_card(card, west_player, east_player)
-						#if buy_options == None:
-						#	continue
-						#player.money -= buy_options[0].total_cost
-						#cost = 0
-						#for c in buy_options[0].east_trades:
-						#	cost += player.east_trade_prices[c.get_info()[0]]
-						#east_player.money += cost
-						#cost = 0
-						#for c in buy_options[0].east_trades:
-						#	cost += player.west_trade_prices[c.get_info()[0]]
-						#west_player.money += cost
+						buy_options = player.buy_card(card, west_player, east_player)
+						if len(buy_options) == 0:
+							continue
+						player.money -= buy_options[0].total_cost
+						east_player.money += buy_options[0].east_cost
+						west_player.money += buy_options[0].west_cost
 					if can_buy:
 						card.play(player, west_player, east_player)
 						player.get_cards().append(card)
@@ -152,6 +146,13 @@ init_games()
 game = GameState([Personalities.StupidAI, Personalities.StupidAI, Personalities.StupidAI])
 game.setup_age_cards(__all_cards)
 game.game_loop()
+
+#p = game.players[0]
+#p.money = 10
+#p.tableau += [find_card(__all_cards, "quarry"), find_card(__all_cards, "clay pit"), find_card(__all_cards, "press")]
+#game.players[1].tableau += [find_card(__all_cards, "glassworks"), find_card(__all_cards, "sawmill"), find_card(__all_cards, "foundry")]
+
+#p.buy_card(find_card(__all_cards, "fortification"), game.players[1], game.players[2])
 
 #game.players[0].tableau += [find_card(__all_cards, "study"), find_card(__all_cards, "lodge"), find_card(__all_cards, "scientist guild")]
 #print helpers.score_science(game.players[0])
