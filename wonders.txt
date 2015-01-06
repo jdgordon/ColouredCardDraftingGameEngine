@@ -1,9 +1,0 @@
-#city name, full name, free slot, A side count, ..., B side count, ...
-rhodes, the colossus of rhodes, O, 3, WW, BBB, VVV, 2 shields, OOOO, VVVVVVV, 2, SSS, $$$VVVshield, OOOO$$$$VVVVshield
-alexandria, the lighthouse of alexandria, G, 3, SS, VVV, OO, B/O/W/S, GG, VVVVVVV, 3, BB, B/O/W/S, WW, G/L/P, SSS, VVVVVVV
-ephesus, the temple of artemis in ephesus, P, 3, SS, VVV, WW, $$$$$$$$$, PP, VVVVVVV, 3, SS, $$$$VV, WW, $$$$VVV, LG, $$$$VVVVV
-babylon, the hanging gardens of babylon, B, 3, BB, VVV, WWW, +{C | T | G}, BBBB, VVVVVVV, 3, BL, VVV, GWW, play both last cards, BBBP, +{C | T | G}
-olympia, the status of zeus in olympia, W, 3, WW, VVV, SS, free card per age, OO, VVVVVVV, 3, WW, -${WOBS} <>, SS, VVVVV, LOO, +{purple}</>
-halicarnassus, the mausoleum of halicarnassus, L, 3, BB, VVV, OOO, build free discarded card, LL, VVVVVVV, 3, OO, VV + build free discarded card, BBB, V + build free discarded card, GLP, build free discarded card
-gizah, the pyramids of giza, S, 3, SS, VVV, WWW, VVVVV, SSSS, VVVVVVVV, 4, WW, VVV, SSS, VVVVV, BBB, VVVVV, SSSSP, VVVVVVV
-
