@@ -10,4 +10,30 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 
-__all__ = ["Players", "Wonders", "Personalities"]
+from sys import stdin
+from common import *
+import cards
+
+
+class Personality:
+	def __init__(self):
+		pass
+	
+	def make_choice(self, options):
+		pass
+
+
+class StupidAI(Personality):
+	def __init__(self):
+		pass
+	
+	def make_choice(self, options):
+		return 0
+
+class Human(Personality):
+	def __init__(self):
+		pass
+	
+	def make_choice(self, options):
+		return int(stdin.readline())
+

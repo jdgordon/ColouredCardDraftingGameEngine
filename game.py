@@ -24,14 +24,15 @@ def init_games():
 	__all_wonders = Wonders.read_wonders_file("wonders.txt")
 
 class GameState:
-	def __init__(self, player_count):
-		self.player_count = player_count
+	def __init__(self, players):
+		self.player_count = len(players)
 		self.players = []
 		self.ages = []
-		self.decks = [[]] * player_count
+		self.decks = [[]] * len(players)
 		self.discard_pile = []
-		for i in range(player_count):
+		for i in range(len(players)):
 			self.players.append(Players.Player("player %d" % (i + 1)))
+			self.players[i].set_personality(players[i]())
 		
 	def setup_age_cards(self, cards):
 		age_1 = [c for c in cards if c.age == 1 and c.players <= self.player_count]
@@ -148,7 +149,7 @@ class GameState:
 			
 
 init_games()
-game = GameState(3)
+game = GameState([Personalities.StupidAI, Personalities.StupidAI, Personalities.StupidAI])
 game.setup_age_cards(__all_cards)
 game.game_loop()
 

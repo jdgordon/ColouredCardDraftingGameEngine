@@ -12,7 +12,6 @@
 # KIND, either express or implied.
 
 from collections import deque
-from sys import stdin
 from common import *
 import cards
 
@@ -33,6 +32,10 @@ class Player:
 		}
 		self.west_trade_prices = self.east_trade_prices.copy()
 		self.wonder = None
+		self.personality = None
+	
+	def set_personality(self, persona):
+		self.personality = persona
 	
 	def get_cards(self):
 		return self.tableau
@@ -60,9 +63,8 @@ class Player:
 			print "[%d]: %s\t%s\t%s" % (i, actions[o[0]], card.get_cost_as_string(), card.pretty_print_name())
 			i += 1
 		print "-=================-"
-		
-		#userinput = int(stdin.readline())
-		return options[0]
+
+		return options[self.personality.make_choice(options)]
 	
 	def print_tableau(self):
 		cards = { CARDS_BROWN:[], CARDS_GREY:[], CARDS_YELLOW:[], CARDS_BLUE:[], CARDS_RED:[], CARDS_GREEN:[], CARDS_PURPLE:[] }
