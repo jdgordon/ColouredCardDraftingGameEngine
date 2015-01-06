@@ -291,7 +291,7 @@ class YellowCard(FooPlaceHolderCard):
 			if DIRECTION_WEST in self.trade_card_info.directions:
 				for r in self.trade_card_info.resources:
 					player.west_trade_prices[r] += self.trade_card_info.value
-			print "TRADE: ", player.east_trade_prices, player.west_trade_prices
+			#print "TRADE: ", player.east_trade_prices, player.west_trade_prices
 		elif self.gain_card_info:
 			count = 0
 			for c in self.gain_card_info.colours:
@@ -307,7 +307,6 @@ class YellowCard(FooPlaceHolderCard):
 		if self.gain_card_info:
 			count = 0
 			for c in self.gain_card_info.colours:
-				print c, count
 				if DIRECTION_WEST in self.gain_card_info.directions:
 					count += self._count_cards(c, west_player)
 				if DIRECTION_SELF in self.gain_card_info.directions:

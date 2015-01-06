@@ -84,10 +84,10 @@ class GameState:
 					if player.can_build_with_chain(card):
 						can_buy = True
 					else:
-						can_buy = True # fixme
 						buy_options = player.buy_card(card, west_player, east_player)
 						if len(buy_options) == 0:
 							continue
+						can_buy = True
 						player.money -= buy_options[0].total_cost
 						east_player.money += buy_options[0].east_cost
 						west_player.money += buy_options[0].west_cost
@@ -111,7 +111,7 @@ class GameState:
 			offset = 0
 			while len(self.decks[0]) > 1:
 				self.play_turn(offset)
-				offset = (offset + 1) % self.player_count
+				offset = (offset + [1, self.player_count - 1, 1][age]) % self.player_count
 			# everyone discards the last card
 			for p in range(self.player_count):
 				self.discard_pile.append(self.decks[p][0])
